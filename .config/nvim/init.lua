@@ -350,7 +350,6 @@ for type, icon in pairs(signs) do
   local hl = "DiagnosticSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
-
 -- Update the theme configuration
 local function configure_theme()
   -- Check if required plugins are available
@@ -364,8 +363,8 @@ local function configure_theme()
     return
   end
   
-  -- Configure TokyoNight with amber customizations
-  -- Let's use the correct API for the version you have
+  -- Try both configuration methods for compatibility
+  -- Method 1: Global variables (older versions)
   vim.g.tokyonight_style = "night"
   vim.g.tokyonight_transparent = true
   vim.g.tokyonight_terminal_colors = true
@@ -393,6 +392,21 @@ local function configure_theme()
     red = "#ff4500",      -- Adjust red to be red-orange
     border = "#ff9e00"
   }
+  
+  -- Method 2: Try a simplified setup call (for newer versions)
+  local setup_ok, _ = pcall(function()
+    tokyonight.setup({
+      style = "night",
+      transparent = true,
+      terminal_colors = true,
+      styles = {
+        comments = "italic",
+        keywords = "italic",
+        functions = "NONE",
+        variables = "NONE"
+      }
+    })
+  end)
   
   -- Try to apply the theme with error handling
   local theme_ok, theme_err = pcall(vim.cmd, "colorscheme tokyonight")
@@ -422,23 +436,82 @@ local function configure_theme()
     })
   end
   
-  -- Apply key highlight customizations directly
-  vim.api.nvim_set_hl(0, "Function", { fg = "#ff9e00", bold = true })
-  vim.api.nvim_set_hl(0, "Cursor", { bg = "#ff9e00", fg = "#000000" })
-  vim.api.nvim_set_hl(0, "CursorLine", { bg = "#1a1a1a" })
-  vim.api.nvim_set_hl(0, "LineNr", { fg = "#3d3522" })
-  vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "#ff9e00" })
+  -- Apply custom amber highlights directly regardless of theme setup method
+  -- This ensures our amber customizations are applied
+  local amber_highlights = {
+    CursorLine = { bg = "#1a1a1a" },
+    LineNr = { fg = "#3d3522" },
+    CursorLineNr = { fg = "#ff9e00" },
+    Function = { fg = "#ff9e00", bold = true },
+    Identifier = { fg = "#e0e0e0" },
+    Type = { fg = "#ffb74d" },
+    String = { fg = "#50fa7b" },
+    Number = { fg = "#ffcc80" },
+    Keyword = { fg = "#ff7a00", italic = true },
+    Comment = { fg = "#756d66", italic = true },
+    
+    -- Diagnostic highlights
+    DiagnosticError = { fg = "#ff4500" },
+    DiagnosticWarn = { fg = "#ff7a00" },
+    DiagnosticInfo = { fg = "#ffb74d" },
+    DiagnosticHint = { fg = "#50fa7b" },
+    
+    -- UI elements
+    StatusLine = { fg = "#e0e0e0", bg = "#0f0f0f" },
+    StatusLineNC = { fg = "#756d66", bg = "#0f0f0f" },
+    NormalFloat = { bg = "#121212" },
+    Pmenu = { fg = "#e0e0e0", bg = "#121212" },
+    PmenuSel = { fg = "#000000", bg = "#ff9e00" },
+    PmenuSbar = { bg = "#121212" },
+    PmenuThumb = { bg = "#3d3522" },
+    
+    -- NvimTree highlights
+    NvimTreeFolderName = { fg = "#ff9e00" },
+    NvimTreeFolderIcon = { fg = "#ff9e00" },
+    NvimTreeOpenedFolderName = { fg = "#ffb74d", bold = true },
+    NvimTreeIndentMarker = { fg = "#3d3522" },
+    NvimTreeGitDirty = { fg = "#ff7a00" },
+    NvimTreeGitNew = { fg = "#50fa7b" },
+    NvimTreeGitDeleted = { fg = "#ff4500" },
+    
+    -- Terminal colors
+    ToggleTerm = { bg = "#0f0f0f" },
+    ToggleTermBorder = { fg = "#ff9e00", bg = "#0f0f0f" },
+    
+    -- Telescope customization
+    TelescopePromptBorder = { fg = "#ff9e00" },
+    TelescopeResultsBorder = { fg = "#ff9e00" },
+    TelescopePreviewBorder = { fg = "#ff9e00" },
+    TelescopeSelectionCaret = { fg = "#ff9e00" },
+    TelescopeSelection = { fg = "#e0e0e0", bg = "#3d3522" },
+    
+    -- More syntax highlighting
+    Constant = { fg = "#ffb74d" },
+    Special = { fg = "#ff7a00" },
+    PreProc = { fg = "#ff9e00" },
+    Title = { fg = "#ff9e00", bold = true },
+  }
   
-  -- NvimTree highlights
-  vim.api.nvim_set_hl(0, "NvimTreeFolderName", { fg = "#ff9e00" })
-  vim.api.nvim_set_hl(0, "NvimTreeFolderIcon", { fg = "#ff9e00" })
-  vim.api.nvim_set_hl(0, "NvimTreeOpenedFolderName", { fg = "#ffb74d", bold = true })
-  vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#3d3522" })
-  vim.api.nvim_set_hl(0, "NvimTreeGitDirty", { fg = "#ff7a00" })
-  vim.api.nvim_set_hl(0, "NvimTreeGitNew", { fg = "#50fa7b" })
-  vim.api.nvim_set_hl(0, "NvimTreeGitDeleted", { fg = "#ff4500" })
+  -- Apply all custom highlights
+  for group, style in pairs(amber_highlights) do
+    vim.api.nvim_set_hl(0, group, style)
+  end
   
-  -- Terminal highlights
-  vim.api.nvim_set_hl(0, "ToggleTerm", { bg = "#0f0f0f" })
-  vim.api.nvim_set_hl(0, "ToggleTermBorder", { fg = "#ff9e00", bg = "#0f0f0f" })
+  -- Set terminal colors to match amber theme
+  vim.g.terminal_color_0 = "#121212"
+  vim.g.terminal_color_1 = "#ff4500"
+  vim.g.terminal_color_2 = "#50fa7b"
+  vim.g.terminal_color_3 = "#ffb74d"
+  vim.g.terminal_color_4 = "#ff7a00"
+  vim.g.terminal_color_5 = "#ff9e00"
+  vim.g.terminal_color_6 = "#8be9fd"
+  vim.g.terminal_color_7 = "#e0e0e0"
+  vim.g.terminal_color_8 = "#756d66"
+  vim.g.terminal_color_9 = "#ff5722"
+  vim.g.terminal_color_10 = "#69ff94"
+  vim.g.terminal_color_11 = "#ffcc80"
+  vim.g.terminal_color_12 = "#ff9800"
+  vim.g.terminal_color_13 = "#ffb74d"
+  vim.g.terminal_color_14 = "#a4ffff"
+  vim.g.terminal_color_15 = "#ffffff"
 end
