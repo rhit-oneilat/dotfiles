@@ -4,24 +4,22 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   vim.fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
   vim.cmd 'packadd packer.nvim'
 end
-
 -- Set leader key
 vim.g.mapleader = " "
-
 -- Plugins
 require('packer').startup(function(use)
   use 'wbthomason/packer.nvim'
   use {'neovim/nvim-lspconfig'}
   use {'hrsh7th/nvim-cmp'}
   use {'hrsh7th/cmp-nvim-lsp'}
-  use {'hrsh7th/cmp-buffer'} -- Added missing buffer source
+  use {'hrsh7th/cmp-buffer'} 
   use {'L3MON4D3/LuaSnip'}
-  use {'saadparwaiz1/cmp_luasnip'} -- Added for LuaSnip integration
+  use {'saadparwaiz1/cmp_luasnip'} 
   use {'nvim-treesitter/nvim-treesitter', run = ':TSUpdate'}
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}}}
   use {'nvim-lualine/lualine.nvim'}
   use {'kyazdani42/nvim-tree.lua'}
-  use {'kyazdani42/nvim-web-devicons'} -- Added for file icons
+  use {'kyazdani42/nvim-web-devicons'} 
   use {'akinsho/bufferline.nvim', requires = 'kyazdani42/nvim-web-devicons'}
   use {'tpope/vim-fugitive'}
   use {'lewis6991/gitsigns.nvim'}
@@ -45,14 +43,13 @@ require('packer').startup(function(use)
   use {'jupyter-vim/jupyter-vim'}
   use {'maxmellon/vim-graphql'}
   use {'aklt/plantuml-syntax'}
-    -- Add these theme-related plugins
-  use 'folke/tokyonight.nvim'     -- Base for customization
-  use 'rktjmp/lush.nvim'          -- For theme customization
-  use 'norcalli/nvim-colorizer.lua' -- For color highlighting
-  use 'xiyaowong/nvim-transparent' -- For transparency
+  -- Theme-related plugins
+  use 'folke/tokyonight.nvim'     
+  use 'rktjmp/lush.nvim'          
+  use 'norcalli/nvim-colorizer.lua' 
+  use 'xiyaowong/nvim-transparent' 
 end)
   
-
 -- Editor Settings
 vim.o.number = true
 vim.o.relativenumber = true
@@ -60,7 +57,7 @@ vim.o.tabstop = 4
 vim.o.shiftwidth = 4
 vim.o.expandtab = true
 vim.o.smartindent = true
-vim.o.termguicolors = true -- Added for better color support
+vim.o.termguicolors = true
 
 -- LSP Config
 local lspconfig = require('lspconfig')
@@ -80,7 +77,14 @@ end
 
 setup_lsp('pyright')
 setup_lsp('rust_analyzer')
-setup_lsp('tsserver')
+-- Replace tsserver with typescript-language-server
+setup_lsp('typescript', {
+  cmd = { "typescript-language-server", "--stdio" },
+  filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
+  init_options = {
+    hostInfo = "neovim"
+  },
+})
 
 -- Rust Tools
 local status_ok, rust_tools = pcall(require, 'rust-tools')
@@ -94,7 +98,6 @@ end
 local status_ok, dap = pcall(require, 'dap')
 if not status_ok then
   vim.notify("Failed to load dap", vim.log.levels.WARN)
-  return
 end
 
 -- Autocompletion
@@ -147,10 +150,10 @@ end
 local status_ok, treesitter = pcall(require, 'nvim-treesitter.configs')
 if status_ok then
   treesitter.setup {
-    ensure_installed = { 'python', 'rust', 'javascript', 'lua', 'bash', 'julia' },
+    ensure_installed = { 'python', 'rust', 'javascript', 'typescript', 'lua', 'bash', 'julia' }, -- Added typescript
     highlight = { enable = true },
-    indent = { enable = true }, -- Added indentation support
-    incremental_selection = { enable = true }, -- Added selection features
+    indent = { enable = true }, 
+    incremental_selection = { enable = true }, 
   }
 else
   vim.notify("Failed to load nvim-treesitter", vim.log.levels.WARN)
@@ -197,6 +200,7 @@ if status_ok then
       python = "python3 -u",
       rust = "cargo run",
       javascript = "node",
+      typescript = "ts-node", -- Added TypeScript support
       julia = "julia",
     },
   }
@@ -220,13 +224,13 @@ vim.api.nvim_set_keymap('n', '<Leader>fb', ':Telescope buffers<CR>', { noremap =
 vim.api.nvim_set_keymap('n', '<Leader>fh', ':Telescope help_tags<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Leader>fp', ':Telescope project<CR>', { noremap = true })
 vim.api.nvim_set_keymap('n', '<Leader>r', ':RunCode<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>e', ':NvimTreeToggle<CR>', { noremap = true, silent = true }) -- Added NvimTree toggle
+vim.api.nvim_set_keymap('n', '<Leader>e', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
 
--- Status Line
+-- Status Line (initial setup, will be overridden later)
 local status_ok, lualine = pcall(require, 'lualine')
 if status_ok then
   lualine.setup {
-    options = { theme = 'gruvbox' },
+    options = { theme = 'tokyonight' }, -- Changed from gruvbox to tokyonight
     sections = {
       lualine_b = { 'branch', 'diff', 'diagnostics' },
     }
@@ -272,6 +276,7 @@ if status_ok then
     ts_config = {
       lua = {'string'},
       javascript = {'template_string'},
+      typescript = {'template_string'}, -- Added typescript
     }
   }
 else
@@ -317,7 +322,10 @@ if status_ok then
       },
       julia = {
         command = {"julia"}
-      }
+      },
+      typescript = {
+        command = {"ts-node"}
+      }, -- Added TypeScript REPL
     },
     highlight = {
       italic = true
@@ -344,7 +352,7 @@ for type, icon in pairs(signs) do
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
--- Theme Configuration
+-- Theme Configuration - Fixed syntax and improved structure
 local function configure_theme()
   -- Check if required plugins are available
   local tokyonight_ok, tokyonight = pcall(require, "tokyonight")
@@ -356,7 +364,7 @@ local function configure_theme()
     vim.cmd "colorscheme default" -- Fallback
     return
   end
-
+  
   -- Configure TokyoNight with amber customizations
   tokyonight.setup({
     style = "night",
@@ -452,11 +460,7 @@ local function configure_theme()
   end
 end
 
--- Remove conflicting colorscheme command (appears before theme setup)
--- The original config has: vim.cmd [[colorscheme gruvbox]]
--- This should be removed or commented out
-
--- Initialize theme with error handling
+-- Initialize theme with error handling (fixed the syntax error)
 local status_ok, _ = pcall(configure_theme)
 if not status_ok then
   vim.notify("Failed to set up theme - check for errors in theme configuration", vim.log.levels.WARN)
