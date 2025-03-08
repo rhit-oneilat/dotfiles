@@ -225,6 +225,7 @@ setup_safe('nvim-treesitter.configs', function(treesitter)
     highlight = { 
       enable = true,
       additional_vim_regex_highlighting = false,
+      disable = {'latex'},
     },
     indent = { enable = true }, 
     incremental_selection = { enable = true },
