@@ -124,7 +124,7 @@ end
 -- Setup common LSP servers
 setup_lsp('pyright')
 setup_lsp('rust_analyzer')
-setup_lsp('tsserver', {
+setup_lsp('ts_ls', {
   filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
   init_options = {
     hostInfo = "neovim"
