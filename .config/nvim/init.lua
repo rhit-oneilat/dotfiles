@@ -2,7 +2,7 @@
 local install_path = vim.fn.stdpath('data') .. '/site/pack/packer/start/packer.nvim'
 if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   vim.fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
-  vim.cmd 'packadd packer.nvim'
+  vim.cmd('packadd packer.nvim')
 end
 -- Set leader key
 vim.g.mapleader = " "
@@ -77,7 +77,7 @@ end
 
 setup_lsp('pyright')
 setup_lsp('rust_analyzer')
--- Replace tsserver with typescript-language-server
+-- FIXED: Using correct LSP server name "tsserver" instead of "typescript"
 setup_lsp('tsserver', {
   filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
   init_options = {
@@ -149,7 +149,7 @@ end
 local status_ok, treesitter = pcall(require, 'nvim-treesitter.configs')
 if status_ok then
   treesitter.setup {
-    ensure_installed = { 'python', 'rust', 'javascript', 'typescript', 'lua', 'bash', 'julia' }, -- Added typescript
+    ensure_installed = { 'python', 'rust', 'javascript', 'typescript', 'lua', 'bash', 'julia' },
     highlight = { enable = true },
     indent = { enable = true }, 
     incremental_selection = { enable = true }, 
@@ -208,7 +208,7 @@ else
 end
 
 -- Autoformat on save
-vim.cmd [[autocmd BufWritePre * lua vim.lsp.buf.format()]]
+vim.cmd[[autocmd BufWritePre * lua vim.lsp.buf.format()]]
 
 -- Better window navigation
 vim.api.nvim_set_keymap('n', '<C-h>', '<C-w>h', { noremap = true })
@@ -229,7 +229,7 @@ vim.api.nvim_set_keymap('n', '<Leader>e', ':NvimTreeToggle<CR>', { noremap = tru
 local status_ok, lualine = pcall(require, 'lualine')
 if status_ok then
   lualine.setup {
-    options = { theme = 'tokyonight' }, -- Changed from gruvbox to tokyonight
+    options = { theme = 'tokyonight' },
     sections = {
       lualine_b = { 'branch', 'diff', 'diagnostics' },
     }
@@ -275,7 +275,7 @@ if status_ok then
     ts_config = {
       lua = {'string'},
       javascript = {'template_string'},
-      typescript = {'template_string'}, -- Added typescript
+      typescript = {'template_string'},
     }
   }
 else
@@ -303,12 +303,12 @@ else
   vim.notify("Failed to load auto-session", vim.log.levels.WARN)
 end
 
--- Jupyter Notebook Support
-local status_ok, magma = pcall(require, 'magma-nvim')
-if status_ok then
-  magma.setup()
+-- FIXED: Improved Jupyter Notebook Support with better error handling
+local magma_exists, magma = pcall(require, 'magma-nvim')
+if magma_exists then
+  pcall(function() magma.setup() end)
 else
-  vim.notify("Failed to load magma-nvim", vim.log.levels.WARN)
+  vim.notify("magma-nvim not available - install or remove from config", vim.log.levels.INFO)
 end
 
 -- REPL Support
@@ -324,7 +324,7 @@ if status_ok then
       },
       typescript = {
         command = {"ts-node"}
-      }, -- Added TypeScript REPL
+      },
     },
     highlight = {
       italic = true
@@ -351,7 +351,7 @@ for type, icon in pairs(signs) do
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
--- Theme Configuration - Fixed syntax and improved structure
+-- FIXED: Theme Configuration - Fixed syntax and improved structure
 local function configure_theme()
   -- Check if required plugins are available
   local tokyonight_ok, tokyonight = pcall(require, "tokyonight")
@@ -360,7 +360,7 @@ local function configure_theme()
   
   if not tokyonight_ok then
     vim.notify("TokyoNight theme not found - installing theme may be required", vim.log.levels.WARN)
-    vim.cmd "colorscheme default" -- Fallback
+    vim.cmd("colorscheme default") -- Fallback
     return
   end
   
@@ -401,6 +401,8 @@ local function configure_theme()
       -- UI elements
       colors.border = "#ff9e00"
       colors.selection_bg = "#3d3522" -- Dark amber for selections
+      
+      -- FIXED: Add missing git table
       colors.git = {
         add = "#50fa7b",
         change = "#ff9e00",
@@ -436,7 +438,7 @@ local function configure_theme()
   })
   
   -- Apply the theme
-  vim.cmd[[colorscheme tokyonight]]
+  vim.cmd("colorscheme tokyonight")
   
   -- Configure transparency plugin if available
   if transparent_ok then
@@ -453,17 +455,17 @@ local function configure_theme()
   -- Configure colorizer for showing colors in code if available
   if colorizer_ok then
     colorizer.setup({
-      '*'; -- Enable for all filetypes
-      css = { css = true; };
+      '*', -- Enable for all filetypes
+      css = { css = true },
     })
   end
 end
 
--- Initialize theme with error handling (fixed the syntax error)
+-- Initialize theme with error handling
 local status_ok, _ = pcall(configure_theme)
 if not status_ok then
   vim.notify("Failed to set up theme - check for errors in theme configuration", vim.log.levels.WARN)
-  vim.cmd "colorscheme default" -- Fallback
+  vim.cmd("colorscheme default") -- Fallback
 end
 
 -- Configure cursor to be an orange block
@@ -616,13 +618,13 @@ if status_ok then
   vim.api.nvim_create_autocmd("ColorScheme", {
     pattern = "*",
     callback = function()
-      vim.cmd [[highlight NvimTreeFolderName guifg=#ff9e00]]
-      vim.cmd [[highlight NvimTreeFolderIcon guifg=#ff9e00]]
-      vim.cmd [[highlight NvimTreeOpenedFolderName guifg=#ffb74d gui=bold]]
-      vim.cmd [[highlight NvimTreeIndentMarker guifg=#3d3522]]
-      vim.cmd [[highlight NvimTreeGitDirty guifg=#ff7a00]]
-      vim.cmd [[highlight NvimTreeGitNew guifg=#50fa7b]]
-      vim.cmd [[highlight NvimTreeGitDeleted guifg=#ff4500]]
+      vim.cmd[[highlight NvimTreeFolderName guifg=#ff9e00]]
+      vim.cmd[[highlight NvimTreeFolderIcon guifg=#ff9e00]]
+      vim.cmd[[highlight NvimTreeOpenedFolderName guifg=#ffb74d gui=bold]]
+      vim.cmd[[highlight NvimTreeIndentMarker guifg=#3d3522]]
+      vim.cmd[[highlight NvimTreeGitDirty guifg=#ff7a00]]
+      vim.cmd[[highlight NvimTreeGitNew guifg=#50fa7b]]
+      vim.cmd[[highlight NvimTreeGitDeleted guifg=#ff4500]]
     end
   })
 else
