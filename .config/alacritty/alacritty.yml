@@ -1,0 +1,101 @@
+# ~/.config/alacritty/alacritty.yml
+
+window:
+  padding:
+    x: 10
+    y: 10
+  decorations: none
+  opacity: 0.95
+  dynamic_title: true
+
+scrolling:
+  history: 10000
+  multiplier: 3
+
+font:
+  normal:
+    family: IBM Plex Mono
+    style: Regular
+  bold:
+    family: IBM Plex Mono
+    style: Bold
+  italic:
+    family: IBM Plex Mono
+    style: Italic
+  bold_italic:
+    family: IBM Plex Mono
+    style: Bold Italic
+  size: 11.0
+  offset:
+    x: 0
+    y: 0
+  glyph_offset:
+    x: 0
+    y: 0
+
+draw_bold_text_with_bright_colors: true
+
+colors:
+  # Default colors
+  primary:
+    background: '#0f0f0f'
+    foreground: '#e0e0e0'
+
+  # Normal colors
+  normal:
+    black:   '#121212'
+    red:     '#ff4500'
+    green:   '#50fa7b'
+    yellow:  '#ffb74d'
+    blue:    '#ff7a00'  # Using orange instead of blue
+    magenta: '#ff9e00'  # Using amber instead of magenta
+    cyan:    '#8be9fd'
+    white:   '#e0e0e0'
+
+  # Bright colors
+  bright:
+    black:   '#756d66'
+    red:     '#ff5722'
+    green:   '#69ff94'
+    yellow:  '#ffcc80'
+    blue:    '#ff9800'  # Using darker orange
+    magenta: '#ffb74d'  # Using lighter amber
+    cyan:    '#a4ffff'
+    white:   '#ffffff'
+
+  # Search colors
+  search:
+    matches:
+      foreground: '#000000'
+      background: '#ff9e00'
+    focused_match:
+      foreground: '#000000'
+      background: '#ffb74d'
+
+  # Selection colors
+  selection:
+    text: '#000000'
+    background: '#ff9e00'
+
+cursor:
+  style:
+    shape: Block
+  unfocused_hollow: true
+  thickness: 0.15
+  blinking: On
+  blink_interval: 750
+  # Custom orange cursor
+  vi_mode_style: 
+    shape: Block
+  custom_colors: true
+  color:
+    text: '#000000'
+    cursor: '#ff9e00'
+
+key_bindings:
+  - { key: V,        mods: Control|Shift, action: Paste            }
+  - { key: C,        mods: Control|Shift, action: Copy             }
+  - { key: Insert,   mods: Shift,         action: PasteSelection   }
+  - { key: Key0,     mods: Control,       action: ResetFontSize    }
+  - { key: Plus,     mods: Control,       action: IncreaseFontSize }
+  - { key: Minus,    mods: Control,       action: DecreaseFontSize }
