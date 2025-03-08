@@ -78,8 +78,7 @@ end
 setup_lsp('pyright')
 setup_lsp('rust_analyzer')
 -- Replace tsserver with typescript-language-server
-setup_lsp('typescript', {
-  cmd = { "typescript-language-server", "--stdio" },
+setup_lsp('tsserver', {
   filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
   init_options = {
     hostInfo = "neovim"
