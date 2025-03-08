@@ -351,8 +351,7 @@ for type, icon in pairs(signs) do
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
--- FIXED: Theme Configuration - Fixed syntax and improved structure
--- Fixed Theme Configuration 
+-- Fixed Theme Configuration with compatibility fixes
 local function configure_theme()
   -- Check if required plugins are available
   local tokyonight_ok, tokyonight = pcall(require, "tokyonight")
@@ -366,15 +365,16 @@ local function configure_theme()
   end
   
   -- Configure TokyoNight with amber customizations
+  -- FIXED: Use the API that your plugin version supports
   tokyonight.setup({
     style = "night",
     transparent = true,
     terminal_colors = true,
     styles = {
-      comments = { italic = true },
-      keywords = { italic = true },
-      functions = { bold = true },
-      variables = {},
+      comments = "italic",
+      keywords = "italic",
+      functions = "bold",
+      variables = "NONE",
       sidebars = "dark",
       floats = "dark",
     },
@@ -410,13 +410,13 @@ local function configure_theme()
       colors.git.delete = "#ff4500"
     end,
     on_highlights = function(hl, c)
-      -- Custom highlights
+      -- Custom highlights - FIXED: Use format compatible with your plugin version
       hl.CursorLine = { bg = "#1a1a1a" }
       hl.LineNr = { fg = "#3d3522" }
       hl.CursorLineNr = { fg = "#ff9e00" }
       
       -- Function names in amber
-      hl.Function = { fg = c.orange, style = { bold = true } }
+      hl.Function = { fg = c.orange, bold = true }
       
       -- LSP highlights
       hl.DiagnosticError = { fg = "#ff4500" }
@@ -437,8 +437,13 @@ local function configure_theme()
     end,
   })
   
-  -- Apply the theme
-  vim.cmd("colorscheme tokyonight")
+  -- Try to apply the theme with error handling
+  local theme_ok, theme_err = pcall(vim.cmd, "colorscheme tokyonight")
+  if not theme_ok then
+    vim.notify("Failed to apply TokyoNight theme: " .. tostring(theme_err), vim.log.levels.WARN)
+    vim.cmd("colorscheme default") -- Fallback
+    return
+  end
   
   -- Configure transparency plugin if available
   if transparent_ok then
@@ -459,268 +464,56 @@ local function configure_theme()
       css = { css = true },
     })
   end
+  
+  -- MANUAL FALLBACK: Apply key highlight customizations directly if the theme loaded
+  -- but on_highlights didn't work
+  vim.api.nvim_set_hl(0, "Function", { fg = "#ff9e00", bold = true })
+  vim.api.nvim_set_hl(0, "Cursor", { bg = "#ff9e00", fg = "#000000" })
+  vim.api.nvim_set_hl(0, "CursorLine", { bg = "#1a1a1a" })
+  vim.api.nvim_set_hl(0, "LineNr", { fg = "#3d3522" })
+  vim.api.nvim_set_hl(0, "CursorLineNr", { fg = "#ff9e00" })
+  
+  -- NvimTree highlights
+  vim.api.nvim_set_hl(0, "NvimTreeFolderName", { fg = "#ff9e00" })
+  vim.api.nvim_set_hl(0, "NvimTreeFolderIcon", { fg = "#ff9e00" })
+  vim.api.nvim_set_hl(0, "NvimTreeOpenedFolderName", { fg = "#ffb74d", bold = true })
+  vim.api.nvim_set_hl(0, "NvimTreeIndentMarker", { fg = "#3d3522" })
+  vim.api.nvim_set_hl(0, "NvimTreeGitDirty", { fg = "#ff7a00" })
+  vim.api.nvim_set_hl(0, "NvimTreeGitNew", { fg = "#50fa7b" })
+  vim.api.nvim_set_hl(0, "NvimTreeGitDeleted", { fg = "#ff4500" })
+  
+  -- Terminal highlights
+  vim.api.nvim_set_hl(0, "ToggleTerm", { bg = "#0f0f0f" })
+  vim.api.nvim_set_hl(0, "ToggleTermBorder", { fg = "#ff9e00", bg = "#0f0f0f" })
 end
 
 -- Initialize theme with better error handling
-local status_ok, error_msg = pcall(configure_theme)
-if not status_ok then
-  vim.notify("Failed to set up theme: " .. tostring(error_msg), vim.log.levels.WARN)
-  vim.cmd("colorscheme default") -- Fallback
+local theme_status, theme_error = pcall(configure_theme)
+if not theme_status then
+  vim.notify("Failed to configure theme: " .. tostring(theme_error), vim.log.levels.WARN)
+  vim.cmd("colorscheme default") -- Ultimate fallback
 end
 
 -- Configure cursor to be an orange block
 vim.opt.guicursor = "n-v-c:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
-vim.api.nvim_set_hl(0, "Cursor", { bg = "#ff9e00", fg = "#000000" })
 
--- Configure Lualine with matching theme (moved after theme is applied)
-vim.defer_fn(function()
-  local status_ok, lualine = pcall(require, 'lualine')
-  if status_ok then
-    lualine.setup {
-      options = {
-        theme = 'tokyonight',
-        component_separators = { left = '', right = '' },
-        section_separators = { left = '', right = '' },
-      },
-      sections = {
-        lualine_a = {'mode'},
-        lualine_b = {'branch', 'diff', 'diagnostics'},
-        lualine_c = {'filename'},
-        lualine_x = {'filetype'},
-        lualine_y = {'progress'},
-        lualine_z = {'location'}
-      },
-      inactive_sections = {
-        lualine_a = {},
-        lualine_b = {},
-        lualine_c = {'filename'},
-        lualine_x = {'location'},
-        lualine_y = {},
-        lualine_z = {}
-      },
-    }
-  else
-    vim.notify("Failed to load lualine", vim.log.levels.WARN)
-  end
-end, 100)  -- Small delay to ensure theme is applied first
-
--- Create an autocmd to set NvimTree colors after colorscheme changes
-vim.api.nvim_create_autocmd("ColorScheme", {
-  pattern = "*",
-  callback = function()
-    vim.cmd([[highlight NvimTreeFolderName guifg=#ff9e00]])
-    vim.cmd([[highlight NvimTreeFolderIcon guifg=#ff9e00]])
-    vim.cmd([[highlight NvimTreeOpenedFolderName guifg=#ffb74d gui=bold]])
-    vim.cmd([[highlight NvimTreeIndentMarker guifg=#3d3522]])
-    vim.cmd([[highlight NvimTreeGitDirty guifg=#ff7a00]])
-    vim.cmd([[highlight NvimTreeGitNew guifg=#50fa7b]])
-    vim.cmd([[highlight NvimTreeGitDeleted guifg=#ff4500]])
-    
-    -- Also fix ToggleTerm highlights
-    vim.api.nvim_set_hl(0, "ToggleTerm", { bg = "#0f0f0f" })
-    vim.api.nvim_set_hl(0, "ToggleTermBorder", { fg = "#ff9e00", bg = "#0f0f0f" })
-  end
-})
-
--- Configure cursor to be an orange block
-vim.opt.guicursor = "n-v-c:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
-vim.api.nvim_set_hl(0, "Cursor", { bg = "#ff9e00", fg = "#000000" })
-
--- Configure Lualine with matching theme
-local status_ok, lualine = pcall(require, 'lualine')
-if status_ok then
-  lualine.setup {
-    options = {
-      theme = 'tokyonight',
-      component_separators = { left = '', right = '' },
-      section_separators = { left = '', right = '' },
-    },
-    sections = {
-      lualine_a = {'mode'},
-      lualine_b = {'branch', 'diff', 'diagnostics'},
-      lualine_c = {'filename'},
-      lualine_x = {'filetype'},
-      lualine_y = {'progress'},
-      lualine_z = {'location'}
-    },
-    inactive_sections = {
-      lualine_a = {},
-      lualine_b = {},
-      lualine_c = {'filename'},
-      lualine_x = {'location'},
-      lualine_y = {},
-      lualine_z = {}
-    },
-  }
-else
-  vim.notify("Failed to load lualine", vim.log.levels.WARN)
-end
-
--- Configure bufferline to match theme
-local status_ok, bufferline = pcall(require, 'bufferline')
-if status_ok then
-  bufferline.setup {
-    options = {
-      separator_style = "slant",
-      offsets = {{filetype = "NvimTree", text = "Explorer", text_align = "center"}},
-      show_buffer_close_icons = true,
-      show_close_icon = true,
-      color_icons = true,
-      diagnostics = "nvim_lsp",
-    },
-    highlights = {
-      fill = {
-        bg = "#0f0f0f"
-      },
-      background = {
-        bg = "#121212"
-      },
-      tab = {
-        bg = "#121212"
-      },
-      tab_selected = {
-        fg = "#ff9e00",
-        bg = "#0f0f0f",
-        bold = true
-      },
-      buffer_selected = {
-        fg = "#ff9e00",
-        bg = "#0f0f0f",
-        bold = true
-      },
-      separator = {
-        fg = "#121212",
-        bg = "#121212",
-      },
-      separator_selected = {
-        fg = "#121212",
-        bg = "#0f0f0f",
-      },
-      indicator_selected = {
-        fg = "#ff9e00",
-      },
-    }
-  }
-else
-  vim.notify("Failed to load bufferline", vim.log.levels.WARN)
-end
-
--- Configure NvimTree colors
-local status_ok, nvim_tree = pcall(require, 'nvim-tree')
-if status_ok then
-  nvim_tree.setup {
-    view = {
-      side = "left",
-      width = 30,
-    },
-    renderer = {
-      add_trailing = false,
-      group_empty = false,
-      highlight_git = true,
-      highlight_opened_files = "name",
-      root_folder_modifier = ":~",
-      indent_markers = {
-        enable = true,
-        icons = {
-          corner = "└ ",
-          edge = "│ ",
-          none = "  ",
-        },
-      },
-      icons = {
-        webdev_colors = true,
-        git_placement = "before",
-        padding = " ",
-        symlink_arrow = " ➛ ",
-        show = {
-          file = true,
-          folder = true,
-          folder_arrow = true,
-          git = true,
-        },
-        glyphs = {
-          default = "",
-          symlink = "",
-          folder = {
-            arrow_closed = "",
-            arrow_open = "",
-            default = "",
-            open = "",
-            empty = "",
-            empty_open = "",
-            symlink = "",
-            symlink_open = "",
-          },
-          git = {
-            unstaged = "✗",
-            staged = "✓",
-            unmerged = "",
-            renamed = "➜",
-            untracked = "★",
-            deleted = "",
-            ignored = "◌",
-          },
-        },
-      },
-    },
-    filters = {
-      dotfiles = false,
-    },
-  }
-  
-  -- Set NvimTree colors (moved to after TokyoNight is loaded)
-  vim.api.nvim_create_autocmd("ColorScheme", {
-    pattern = "*",
-    callback = function()
-      vim.cmd[[highlight NvimTreeFolderName guifg=#ff9e00]]
-      vim.cmd[[highlight NvimTreeFolderIcon guifg=#ff9e00]]
-      vim.cmd[[highlight NvimTreeOpenedFolderName guifg=#ffb74d gui=bold]]
-      vim.cmd[[highlight NvimTreeIndentMarker guifg=#3d3522]]
-      vim.cmd[[highlight NvimTreeGitDirty guifg=#ff7a00]]
-      vim.cmd[[highlight NvimTreeGitNew guifg=#50fa7b]]
-      vim.cmd[[highlight NvimTreeGitDeleted guifg=#ff4500]]
-    end
-  })
-else
-  vim.notify("Failed to load nvim-tree", vim.log.levels.WARN)
-end
-
--- Configure toggleterm to match theme
-local status_ok, toggleterm = pcall(require, 'toggleterm')
-if status_ok then
-  toggleterm.setup {
-    size = 20,
-    open_mapping = [[<C-\>]],
-    shade_terminals = true,
-    shading_factor = 2,
-    direction = "float",
-    float_opts = {
-      border = "curved",
-      winblend = 0,
-      highlights = {
-        border = "Normal",
-        background = "Normal",
-      }
-    }
-  }
-  
-  -- Set terminal colors to match theme
-  vim.g.terminal_color_0 = "#121212"
-  vim.g.terminal_color_1 = "#ff4500"
-  vim.g.terminal_color_2 = "#50fa7b"
-  vim.g.terminal_color_3 = "#ffb74d"
-  vim.g.terminal_color_4 = "#ff7a00"
-  vim.g.terminal_color_5 = "#ff9e00"
-  vim.g.terminal_color_6 = "#8be9fd"
-  vim.g.terminal_color_7 = "#e0e0e0"
-  vim.g.terminal_color_8 = "#756d66"
-  vim.g.terminal_color_9 = "#ff5722"
-  vim.g.terminal_color_10 = "#69ff94"
-  vim.g.terminal_color_11 = "#ffcc80"
-  vim.g.terminal_color_12 = "#ff9800"
-  vim.g.terminal_color_13 = "#ffb74d"
-  vim.g.terminal_color_14 = "#a4ffff"
-  vim.g.terminal_color_15 = "#ffffff"
+-- Set terminal colors to match theme
+vim.g.terminal_color_0 = "#121212"
+vim.g.terminal_color_1 = "#ff4500"
+vim.g.terminal_color_2 = "#50fa7b"
+vim.g.terminal_color_3 = "#ffb74d"
+vim.g.terminal_color_4 = "#ff7a00"
+vim.g.terminal_color_5 = "#ff9e00"
+vim.g.terminal_color_6 = "#8be9fd"
+vim.g.terminal_color_7 = "#e0e0e0"
+vim.g.terminal_color_8 = "#756d66"
+vim.g.terminal_color_9 = "#ff5722"
+vim.g.terminal_color_10 = "#69ff94"
+vim.g.terminal_color_11 = "#ffcc80"
+vim.g.terminal_color_12 = "#ff9800"
+vim.g.terminal_color_13 = "#ffb74d"
+vim.g.terminal_color_14 = "#a4ffff"
+vim.g.terminal_color_15 = "#ffffff"
   
   -- Create autocmd to apply toggleterm highlights after colorscheme changes
   vim.api.nvim_create_autocmd("ColorScheme", {
