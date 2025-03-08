@@ -349,8 +349,19 @@ end
 
 -- Theme Configuration
 local function configure_theme()
+  -- Check if required plugins are available
+  local tokyonight_ok, tokyonight = pcall(require, "tokyonight")
+  local transparent_ok, transparent = pcall(require, "transparent")
+  local colorizer_ok, colorizer = pcall(require, "colorizer")
+  
+  if not tokyonight_ok then
+    vim.notify("TokyoNight theme not found - installing theme may be required", vim.log.levels.WARN)
+    vim.cmd "colorscheme default" -- Fallback
+    return
+  end
+
   -- Configure TokyoNight with amber customizations
-  require("tokyonight").setup({
+  tokyonight.setup({
     style = "night",
     transparent = true,
     terminal_colors = true,
@@ -386,7 +397,7 @@ local function configure_theme()
       -- UI elements
       colors.border = "#ff9e00"
       colors.selection_bg = "#3d3522" -- Dark amber for selections
-      colors.gitSigns = {
+      colors.git = {
         add = "#50fa7b",
         change = "#ff9e00",
         delete = "#ff4500"
@@ -423,27 +434,35 @@ local function configure_theme()
   -- Apply the theme
   vim.cmd[[colorscheme tokyonight]]
   
-  -- Configure transparency plugin
-  require("transparent").setup({
-    enable = true,
-    extra_groups = {
-      "NormalFloat",
-      "NvimTreeNormal",
-      "TelescopeNormal",
-    },
-  })
+  -- Configure transparency plugin if available
+  if transparent_ok then
+    transparent.setup({
+      enable = true,
+      extra_groups = {
+        "NormalFloat",
+        "NvimTreeNormal",
+        "TelescopeNormal",
+      },
+    })
+  end
   
-  -- Configure colorizer for showing colors in code
-  require("colorizer").setup({
-    '*'; -- Enable for all filetypes
-    css = { css = true; };
-  })
+  -- Configure colorizer for showing colors in code if available
+  if colorizer_ok then
+    colorizer.setup({
+      '*'; -- Enable for all filetypes
+      css = { css = true; };
+    })
+  end
 end
+
+-- Remove conflicting colorscheme command (appears before theme setup)
+-- The original config has: vim.cmd [[colorscheme gruvbox]]
+-- This should be removed or commented out
 
 -- Initialize theme with error handling
 local status_ok, _ = pcall(configure_theme)
 if not status_ok then
-  vim.notify("Failed to set up theme - plugins may need to be installed", vim.log.levels.WARN)
+  vim.notify("Failed to set up theme - check for errors in theme configuration", vim.log.levels.WARN)
   vim.cmd "colorscheme default" -- Fallback
 end
 
@@ -593,14 +612,19 @@ if status_ok then
     },
   }
   
-  -- Set NvimTree colors
-  vim.cmd [[highlight NvimTreeFolderName guifg=#ff9e00]]
-  vim.cmd [[highlight NvimTreeFolderIcon guifg=#ff9e00]]
-  vim.cmd [[highlight NvimTreeOpenedFolderName guifg=#ffb74d gui=bold]]
-  vim.cmd [[highlight NvimTreeIndentMarker guifg=#3d3522]]
-  vim.cmd [[highlight NvimTreeGitDirty guifg=#ff7a00]]
-  vim.cmd [[highlight NvimTreeGitNew guifg=#50fa7b]]
-  vim.cmd [[highlight NvimTreeGitDeleted guifg=#ff4500]]
+  -- Set NvimTree colors (moved to after TokyoNight is loaded)
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    pattern = "*",
+    callback = function()
+      vim.cmd [[highlight NvimTreeFolderName guifg=#ff9e00]]
+      vim.cmd [[highlight NvimTreeFolderIcon guifg=#ff9e00]]
+      vim.cmd [[highlight NvimTreeOpenedFolderName guifg=#ffb74d gui=bold]]
+      vim.cmd [[highlight NvimTreeIndentMarker guifg=#3d3522]]
+      vim.cmd [[highlight NvimTreeGitDirty guifg=#ff7a00]]
+      vim.cmd [[highlight NvimTreeGitNew guifg=#50fa7b]]
+      vim.cmd [[highlight NvimTreeGitDeleted guifg=#ff4500]]
+    end
+  })
 else
   vim.notify("Failed to load nvim-tree", vim.log.levels.WARN)
 end
@@ -621,18 +645,6 @@ if status_ok then
         border = "Normal",
         background = "Normal",
       }
-    },
-    highlights = {
-      Normal = {
-        guibg = "#0f0f0f",
-      },
-      NormalFloat = {
-        link = "Normal"
-      },
-      FloatBorder = {
-        guifg = "#ff9e00",
-        guibg = "#0f0f0f",
-      },
     }
   }
   
@@ -653,51 +665,15 @@ if status_ok then
   vim.g.terminal_color_13 = "#ffb74d"
   vim.g.terminal_color_14 = "#a4ffff"
   vim.g.terminal_color_15 = "#ffffff"
+  
+  -- Create autocmd to apply toggleterm highlights after colorscheme changes
+  vim.api.nvim_create_autocmd("ColorScheme", {
+    pattern = "*",
+    callback = function()
+      vim.api.nvim_set_hl(0, "ToggleTerm", { bg = "#0f0f0f" })
+      vim.api.nvim_set_hl(0, "ToggleTermBorder", { fg = "#ff9e00", bg = "#0f0f0f" })
+    end
+  })
 else
   vim.notify("Failed to load toggleterm", vim.log.levels.WARN)
-end
-
--- Configure telescope to match theme
-local status_ok, telescope = pcall(require, 'telescope')
-if status_ok then
-  telescope.setup {
-    defaults = {
-      prompt_prefix = " > ",
-      selection_caret = "  ",
-      entry_prefix = "  ",
-      initial_mode = "insert",
-      selection_strategy = "reset",
-      sorting_strategy = "descending",
-      layout_strategy = "horizontal",
-      layout_config = {
-        horizontal = {
-          prompt_position = "bottom",
-          preview_width = 0.55,
-          results_width = 0.8,
-        },
-        vertical = {
-          mirror = false,
-        },
-        width = 0.87,
-        height = 0.80,
-        preview_cutoff = 120,
-      },
-      path_display = { "truncate" },
-      winblend = 0,
-      border = {},
-      borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
-      color_devicons = true,
-      set_env = { ["COLORTERM"] = "truecolor" },
-    },
-    extensions = {
-      project = {
-        hidden_files = true,
-      },
-    },
-  }
-  
-  -- Load telescope extensions
-  pcall(telescope.load_extension, 'project')
-else
-  vim.notify("Failed to load telescope", vim.log.levels.WARN)
 end
