@@ -52,9 +52,6 @@ require('packer').startup(function(use)
   use 'xiyaowong/nvim-transparent' -- For transparency
 end)
   
-  -- Added colorscheme
-  use {'morhetz/gruvbox'}
-end)
 
 -- Editor Settings
 vim.o.number = true
