@@ -95,10 +95,9 @@ end
 
 -- Debugging
 local status_ok, dap = pcall(require, 'dap')
-if status_ok then
-  dap.setup({})
-else
+if not status_ok then
   vim.notify("Failed to load dap", vim.log.levels.WARN)
+  return
 end
 
 -- Autocompletion
