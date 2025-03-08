@@ -72,6 +72,9 @@ require('packer').startup(function(use)
   use 'folke/tokyonight.nvim'
 end)
 
+require('preview').setup()
+
+
 -- Editor Settings
 vim.opt.number = true
 vim.opt.relativenumber = true
