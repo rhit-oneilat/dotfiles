@@ -4,65 +4,111 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   vim.fn.system({'git', 'clone', '--depth', '1', 'https://github.com/wbthomason/packer.nvim', install_path})
   vim.cmd('packadd packer.nvim')
 end
+
 -- Set leader key
 vim.g.mapleader = " "
+
 -- Plugins
 require('packer').startup(function(use)
+  -- Package manager
   use 'wbthomason/packer.nvim'
-  use {'neovim/nvim-lspconfig'}
-  use {'hrsh7th/nvim-cmp'}
-  use {'hrsh7th/cmp-nvim-lsp'}
-  use {'hrsh7th/cmp-buffer'} 
-  use {'L3MON4D3/LuaSnip'}
-  use {'saadparwaiz1/cmp_luasnip'} 
-  use {'nvim-treesitter/nvim-treesitter', run = ':TSUpdate'}
-  use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}}}
-  use {'nvim-lualine/lualine.nvim'}
-  use {'kyazdani42/nvim-tree.lua'}
-  use {'kyazdani42/nvim-web-devicons'} 
-  use {'akinsho/bufferline.nvim', requires = 'kyazdani42/nvim-web-devicons'}
-  use {'tpope/vim-fugitive'}
-  use {'lewis6991/gitsigns.nvim'}
-  use {'rmagatti/auto-session'}
-  use {'windwp/nvim-autopairs'}
-  use {'nvim-telescope/telescope-project.nvim'}
-  use {'akinsho/toggleterm.nvim'}
-  use {'karb94/neoscroll.nvim'}
-  use {'CRAG666/code_runner.nvim', requires = 'nvim-lua/plenary.nvim'}
-  use {'github/copilot.vim'}
-  use {'tzachar/cmp-tabnine', run='./install.sh', requires = 'hrsh7th/nvim-cmp'}
-  use {'dccsillag/magma-nvim'}
-  use {'hkupty/iron.nvim'}
-  use {'sharkdp/fd'}
-  use {'simrat39/rust-tools.nvim'}
-  use {'mfussenegger/nvim-dap'}
-  use {'jbyuki/one-small-step-for-vimkind'}
-  use {'lervag/vimtex'}
-  use {'julialang/julia-vim'}
-  use {'Olical/conjure'}
-  use {'jupyter-vim/jupyter-vim'}
-  use {'maxmellon/vim-graphql'}
-  use {'aklt/plantuml-syntax'}
-  -- Theme-related plugins
-  use 'folke/tokyonight.nvim'     
-  use 'rktjmp/lush.nvim'          
-  use 'norcalli/nvim-colorizer.lua' 
-  use 'xiyaowong/nvim-transparent' 
-end)
   
+  -- LSP and completion
+  use 'neovim/nvim-lspconfig'
+  use 'hrsh7th/nvim-cmp'
+  use 'hrsh7th/cmp-nvim-lsp'
+  use 'hrsh7th/cmp-buffer'
+  use 'L3MON4D3/LuaSnip'
+  use 'saadparwaiz1/cmp_luasnip'
+  use {'tzachar/cmp-tabnine', run='./install.sh', requires = 'hrsh7th/nvim-cmp'}
+  
+  -- Treesitter for better syntax highlighting
+  use {'nvim-treesitter/nvim-treesitter', run = ':TSUpdate'}
+  
+  -- Navigation and search
+  use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}}}
+  use 'nvim-telescope/telescope-project.nvim'
+  use 'karb94/neoscroll.nvim'
+  use 'sharkdp/fd'
+  
+  -- UI enhancements
+  use 'nvim-lualine/lualine.nvim'
+  use 'kyazdani42/nvim-tree.lua'
+  use 'kyazdani42/nvim-web-devicons'
+  use 'akinsho/bufferline.nvim'
+  
+  -- Git integration
+  use 'tpope/vim-fugitive'
+  use 'lewis6991/gitsigns.nvim'
+  
+  -- Quality of life
+  use 'rmagatti/auto-session'
+  use 'windwp/nvim-autopairs'
+  use 'akinsho/toggleterm.nvim'
+  use {'CRAG666/code_runner.nvim', requires = 'nvim-lua/plenary.nvim'}
+  
+  -- Language specific
+  use 'simrat39/rust-tools.nvim'
+  use 'mfussenegger/nvim-dap'
+  use 'jbyuki/one-small-step-for-vimkind'
+  use 'lervag/vimtex'
+  use 'julialang/julia-vim'
+  use 'Olical/conjure'
+  use 'jupyter-vim/jupyter-vim'
+  use 'maxmellon/vim-graphql'
+  use 'aklt/plantuml-syntax'
+  
+  -- AI assistance
+  use 'github/copilot.vim'
+  
+  -- REPL tools
+  use 'dccsillag/magma-nvim'
+  use 'hkupty/iron.nvim'
+  
+  -- Theme
+  use 'folke/tokyonight.nvim'
+end)
+
 -- Editor Settings
-vim.o.number = true
-vim.o.relativenumber = true
-vim.o.tabstop = 4
-vim.o.shiftwidth = 4
-vim.o.expandtab = true
-vim.o.smartindent = true
-vim.o.termguicolors = true
+vim.opt.number = true
+vim.opt.relativenumber = true
+vim.opt.tabstop = 4
+vim.opt.shiftwidth = 4
+vim.opt.expandtab = true
+vim.opt.smartindent = true
+vim.opt.termguicolors = true
+vim.opt.cursorline = true
+vim.opt.scrolloff = 8
+vim.opt.sidescrolloff = 8
+vim.opt.signcolumn = "yes"
+vim.opt.wrap = false
+vim.opt.incsearch = true
+vim.opt.ignorecase = true
+vim.opt.smartcase = true
+vim.opt.mouse = "a"
+vim.opt.clipboard = "unnamedplus"
+vim.opt.splitright = true
+vim.opt.splitbelow = true
+vim.opt.updatetime = 250
+vim.opt.timeoutlen = 300
+vim.opt.undofile = true
+vim.opt.backup = false
+vim.opt.swapfile = false
+
+-- Theme setup - simplified to just use TokyoNight
+vim.cmd([[colorscheme tokyonight]])
+
+-- Error handling utility
+local function setup_safe(name, setup_func)
+  local status_ok, module = pcall(require, name)
+  if status_ok then
+    pcall(setup_func, module)
+  else
+    vim.notify("Failed to load " .. name, vim.log.levels.WARN)
+  end
+end
 
 -- LSP Config
-local lspconfig = require('lspconfig')
-
--- Add basic setup with error handling
 local function setup_lsp(server, config)
   config = config or {}
   
@@ -75,10 +121,10 @@ local function setup_lsp(server, config)
   lsp[server].setup(config)
 end
 
+-- Setup common LSP servers
 setup_lsp('pyright')
 setup_lsp('rust_analyzer')
--- FIXED: Using correct LSP server name "tsserver" instead of "typescript"
-setup_lsp('ts_ls', {
+setup_lsp('tsserver', {
   filetypes = { "javascript", "javascriptreact", "javascript.jsx", "typescript", "typescriptreact", "typescript.tsx" },
   init_options = {
     hostInfo = "neovim"
@@ -86,22 +132,22 @@ setup_lsp('ts_ls', {
 })
 
 -- Rust Tools
-local status_ok, rust_tools = pcall(require, 'rust-tools')
-if status_ok then
-  rust_tools.setup({})
-else
-  vim.notify("Failed to load rust-tools", vim.log.levels.WARN)
-end
-
--- Debugging
-local status_ok, dap = pcall(require, 'dap')
-if not status_ok then
-  vim.notify("Failed to load dap", vim.log.levels.WARN)
-end
+setup_safe('rust-tools', function(rt)
+  rt.setup({
+    server = {
+      settings = {
+        ['rust-analyzer'] = {
+          checkOnSave = {
+            command = "clippy"
+          }
+        }
+      }
+    }
+  })
+end)
 
 -- Autocompletion
-local status_ok, cmp = pcall(require, 'cmp')
-if status_ok then
+setup_safe('cmp', function(cmp)
   local luasnip_ok, luasnip = pcall(require, 'luasnip')
   
   cmp.setup {
@@ -139,56 +185,129 @@ if status_ok then
       { name = 'luasnip' },
       { name = 'buffer' },
       { name = 'cmp_tabnine' }
-    })
+    }),
+    window = {
+      completion = cmp.config.window.bordered(),
+      documentation = cmp.config.window.bordered(),
+    },
+    formatting = {
+      format = function(entry, vim_item)
+        vim_item.menu = ({
+          nvim_lsp = "[LSP]",
+          luasnip = "[Snippet]",
+          buffer = "[Buffer]",
+          cmp_tabnine = "[TN]",
+        })[entry.source.name]
+        return vim_item
+      end
+    }
   }
-else
-  vim.notify("Failed to load nvim-cmp", vim.log.levels.WARN)
-end
+end)
 
 -- Treesitter
-local status_ok, treesitter = pcall(require, 'nvim-treesitter.configs')
-if status_ok then
+setup_safe('nvim-treesitter.configs', function(treesitter)
   treesitter.setup {
-    ensure_installed = { 'python', 'rust', 'javascript', 'typescript', 'lua', 'bash', 'julia' },
-    highlight = { enable = true },
+    ensure_installed = { 'python', 'rust', 'javascript', 'typescript', 'lua', 'bash', 'julia', 'markdown', 'json', 'yaml', 'vim' },
+    sync_install = false,
+    auto_install = true,
+    highlight = { 
+      enable = true,
+      additional_vim_regex_highlighting = false,
+    },
     indent = { enable = true }, 
-    incremental_selection = { enable = true }, 
+    incremental_selection = { enable = true },
+    context_commentstring = { enable = true, enable_autocmd = false },
   }
-else
-  vim.notify("Failed to load nvim-treesitter", vim.log.levels.WARN)
-end
+end)
 
 -- Telescope Setup
-local status_ok, telescope = pcall(require, 'telescope')
-if status_ok then
-  telescope.setup{}
+setup_safe('telescope', function(telescope)
+  telescope.setup {
+    defaults = {
+      prompt_prefix = " ",
+      selection_caret = " ",
+      path_display = { "smart" },
+      file_ignore_patterns = { "node_modules", ".git/", "dist/", "build/" },
+      layout_strategy = "horizontal",
+      layout_config = {
+        horizontal = {
+          preview_width = 0.55,
+        },
+      },
+    },
+    extensions = {
+      project = {
+        hidden_files = true,
+        theme = "dropdown",
+      }
+    }
+  }
   
-  -- Load telescope extensions
-  pcall(telescope.load_extension, 'project')
-else
-  vim.notify("Failed to load telescope", vim.log.levels.WARN)
-end
+  telescope.load_extension('project')
+end)
 
 -- Nvim-tree Setup
-local status_ok, nvim_tree = pcall(require, 'nvim-tree')
-if status_ok then
-  nvim_tree.setup{}
-else
-  vim.notify("Failed to load nvim-tree", vim.log.levels.WARN)
-end
+setup_safe('nvim-tree', function(nvim_tree)
+  nvim_tree.setup {
+    sort_by = "case_sensitive",
+    view = {
+      width = 30,
+    },
+    filters = {
+      dotfiles = false,
+    },
+    git = {
+      enable = true,
+      ignore = false,
+    },
+    renderer = {
+      group_empty = true,
+      icons = {
+        show = {
+          git = true,
+          folder = true,
+          file = true,
+          folder_arrow = true,
+        },
+      },
+    },
+  }
+end)
 
 -- Bufferline Setup
-local status_ok, bufferline = pcall(require, 'bufferline')
-if status_ok then
-  bufferline.setup{}
-else
-  vim.notify("Failed to load bufferline", vim.log.levels.WARN)
-end
+setup_safe('bufferline', function(bufferline)
+  bufferline.setup {
+    options = {
+      close_command = "bdelete! %d",
+      right_mouse_command = "bdelete! %d",
+      diagnostics = "nvim_lsp",
+      diagnostics_indicator = function(_, _, diagnostics_dict, _)
+        local s = " "
+        for e, n in pairs(diagnostics_dict) do
+          local sym = e == "error" and " " or (e == "warning" and " " or "")
+          s = s .. sym .. n
+        end
+        return s
+      end,
+      offsets = {
+        {
+          filetype = "NvimTree",
+          text = "File Explorer",
+          highlight = "Directory",
+          text_align = "left"
+        }
+      },
+      show_buffer_icons = true,
+      show_buffer_close_icons = true,
+      show_close_icon = true,
+      separator_style = "thin",
+    }
+  }
+end)
 
 -- Code Runner Setup
-local status_ok, code_runner = pcall(require, 'code_runner')
-if status_ok then
-  code_runner.setup{
+setup_safe('code_runner', function(code_runner)
+  code_runner.setup {
     mode = "term",
     focus = true,
     term = {
@@ -199,48 +318,100 @@ if status_ok then
       python = "python3 -u",
       rust = "cargo run",
       javascript = "node",
-      typescript = "ts-node", -- Added TypeScript support
+      typescript = "ts-node",
       julia = "julia",
+      lua = "lua",
+      sh = "bash",
     },
   }
-else
-  vim.notify("Failed to load code_runner", vim.log.levels.WARN)
-end
+end)
 
--- Autoformat on save
-vim.cmd[[autocmd BufWritePre * lua vim.lsp.buf.format()]]
+-- Autoformat on save (with safety)
+vim.cmd[[
+  augroup FormatOnSave
+    autocmd!
+    autocmd BufWritePre * lua vim.lsp.buf.format({timeout_ms = 1000})
+  augroup END
+]]
 
 -- Better window navigation
-vim.api.nvim_set_keymap('n', '<C-h>', '<C-w>h', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-j>', '<C-w>j', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-k>', '<C-w>k', { noremap = true })
-vim.api.nvim_set_keymap('n', '<C-l>', '<C-w>l', { noremap = true })
+vim.keymap.set('n', '<C-h>', '<C-w>h', { noremap = true })
+vim.keymap.set('n', '<C-j>', '<C-w>j', { noremap = true })
+vim.keymap.set('n', '<C-k>', '<C-w>k', { noremap = true })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { noremap = true })
 
--- Keybindings
-vim.api.nvim_set_keymap('n', '<Leader>ff', ':Telescope find_files<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>fg', ':Telescope live_grep<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>fb', ':Telescope buffers<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>fh', ':Telescope help_tags<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>fp', ':Telescope project<CR>', { noremap = true })
-vim.api.nvim_set_keymap('n', '<Leader>r', ':RunCode<CR>', { noremap = true, silent = true })
-vim.api.nvim_set_keymap('n', '<Leader>e', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
+-- Resize with arrows
+vim.keymap.set('n', '<C-Up>', ':resize -2<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-Down>', ':resize +2<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-Left>', ':vertical resize -2<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<C-Right>', ':vertical resize +2<CR>', { noremap = true, silent = true })
 
--- Status Line (initial setup, will be overridden later)
-local status_ok, lualine = pcall(require, 'lualine')
-if status_ok then
+-- Stay in indent mode when indenting
+vim.keymap.set('v', '<', '<gv', { noremap = true })
+vim.keymap.set('v', '>', '>gv', { noremap = true })
+
+-- Move text up and down
+vim.keymap.set('v', '<A-j>', ":m .+1<CR>==", { noremap = true })
+vim.keymap.set('v', '<A-k>', ":m .-2<CR>==", { noremap = true })
+vim.keymap.set('x', '<A-j>', ":move '>+1<CR>gv-gv", { noremap = true })
+vim.keymap.set('x', '<A-k>', ":move '<-2<CR>gv-gv", { noremap = true })
+
+-- Common keybindings
+vim.keymap.set('n', '<Leader>ff', ':Telescope find_files<CR>', { noremap = true })
+vim.keymap.set('n', '<Leader>fg', ':Telescope live_grep<CR>', { noremap = true })
+vim.keymap.set('n', '<Leader>fb', ':Telescope buffers<CR>', { noremap = true })
+vim.keymap.set('n', '<Leader>fh', ':Telescope help_tags<CR>', { noremap = true })
+vim.keymap.set('n', '<Leader>fp', ':Telescope project<CR>', { noremap = true })
+vim.keymap.set('n', '<Leader>r', ':RunCode<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>e', ':NvimTreeToggle<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>q', ':bdelete<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>h', ':nohlsearch<CR>', { noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>w', ':w<CR>', { noremap = true })
+vim.keymap.set('n', '<Leader>c', ':RunClose<CR>', { noremap = true, silent = true })
+
+-- LSP keybindings
+vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, { noremap = true, silent = true })
+vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { noremap = true, silent = true })
+vim.keymap.set('n', 'K', vim.lsp.buf.hover, { noremap = true, silent = true })
+vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, { noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>k', vim.lsp.buf.signature_help, { noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>rn', vim.lsp.buf.rename, { noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>ca', vim.lsp.buf.code_action, { noremap = true, silent = true })
+vim.keymap.set('n', 'gr', vim.lsp.buf.references, { noremap = true, silent = true })
+vim.keymap.set('n', '<Leader>d', vim.diagnostic.open_float, { noremap = true, silent = true })
+vim.keymap.set('n', '[d', vim.diagnostic.goto_prev, { noremap = true, silent = true })
+vim.keymap.set('n', ']d', vim.diagnostic.goto_next, { noremap = true, silent = true })
+
+-- Status Line
+setup_safe('lualine', function(lualine)
   lualine.setup {
-    options = { theme = 'tokyonight' },
+    options = { 
+      theme = 'tokyonight',
+      component_separators = { left = '', right = ''},
+      section_separators = { left = '', right = ''},
+      disabled_filetypes = { "NvimTree", "toggleterm" }
+    },
     sections = {
-      lualine_b = { 'branch', 'diff', 'diagnostics' },
+      lualine_a = {'mode'},
+      lualine_b = {'branch', 'diff', 'diagnostics'},
+      lualine_c = {'filename'},
+      lualine_x = {'encoding', 'fileformat', 'filetype'},
+      lualine_y = {'progress'},
+      lualine_z = {'location'}
+    },
+    inactive_sections = {
+      lualine_a = {},
+      lualine_b = {},
+      lualine_c = {'filename'},
+      lualine_x = {'location'},
+      lualine_y = {},
+      lualine_z = {}
     }
   }
-else
-  vim.notify("Failed to load lualine", vim.log.levels.WARN)
-end
+end)
 
 -- Floating Terminal
-local status_ok, toggleterm = pcall(require, 'toggleterm')
-if status_ok then
+setup_safe('toggleterm', function(toggleterm)
   toggleterm.setup {
     open_mapping = [[<C-\>]],
     direction = 'float',
@@ -248,92 +419,172 @@ if status_ok then
     shell = vim.o.shell,
     float_opts = {
       border = "curved",
+      width = function() 
+        return math.floor(vim.o.columns * 0.85)
+      end,
+      height = function() 
+        return math.floor(vim.o.lines * 0.8)
+      end
+    },
+    highlights = {
+      FloatBorder = { link = "FloatBorder" },
+      NormalFloat = { link = "NormalFloat" }
     }
   }
-else
-  vim.notify("Failed to load toggleterm", vim.log.levels.WARN)
-end
+end)
 
 -- Git Blame in Status Line
-local status_ok, gitsigns = pcall(require, 'gitsigns')
-if status_ok then
+setup_safe('gitsigns', function(gitsigns)
   gitsigns.setup {
+    signs = {
+      add = { text = '│' },
+      change = { text = '│' },
+      delete = { text = '_' },
+      topdelete = { text = '‾' },
+      changedelete = { text = '~' },
+    },
     current_line_blame = true,
     current_line_blame_opts = {
+      virt_text = true,
+      virt_text_pos = 'eol',
       delay = 300,
-    }
+    },
+    on_attach = function(bufnr)
+      local gs = package.loaded.gitsigns
+
+      -- Navigation
+      vim.keymap.set('n', ']c', function()
+        if vim.wo.diff then return ']c' end
+        vim.schedule(function() gs.next_hunk() end)
+        return '<Ignore>'
+      end, {expr=true, buffer=bufnr})
+
+      vim.keymap.set('n', '[c', function()
+        if vim.wo.diff then return '[c' end
+        vim.schedule(function() gs.prev_hunk() end)
+        return '<Ignore>'
+      end, {expr=true, buffer=bufnr})
+
+      -- Actions
+      vim.keymap.set('n', '<Leader>hs', gs.stage_hunk, {buffer=bufnr})
+      vim.keymap.set('n', '<Leader>hr', gs.reset_hunk, {buffer=bufnr})
+      vim.keymap.set('n', '<Leader>hu', gs.undo_stage_hunk, {buffer=bufnr})
+      vim.keymap.set('n', '<Leader>hp', gs.preview_hunk, {buffer=bufnr})
+      vim.keymap.set('n', '<Leader>hb', function() gs.blame_line{full=true} end, {buffer=bufnr})
+    end
   }
-else
-  vim.notify("Failed to load gitsigns", vim.log.levels.WARN)
-end
+end)
 
 -- Auto-close Brackets and Quotes
-local status_ok, autopairs = pcall(require, 'nvim-autopairs')
-if status_ok then
+setup_safe('nvim-autopairs', function(autopairs)
   autopairs.setup {
     check_ts = true,
     ts_config = {
       lua = {'string'},
       javascript = {'template_string'},
       typescript = {'template_string'},
-    }
+    },
+    disable_filetype = { "TelescopePrompt" },
+    fast_wrap = {
+      map = "<M-e>",
+      chars = { "{", "[", "(", '"', "'" },
+      pattern = [=[%'%"%)%>%]%)%}%,=%]]=],
+      end_key = "$",
+      keys = "qwertyuiopzxcvbnmasdfghjkl",
+      check_comma = true,
+      highlight = "Search",
+      highlight_grey = "Comment"
+    },
   }
-else
-  vim.notify("Failed to load nvim-autopairs", vim.log.levels.WARN)
-end
+  
+  -- Integration with cmp
+  local cmp_autopairs = require('nvim-autopairs.completion.cmp')
+  local cmp_status_ok, cmp = pcall(require, 'cmp')
+  if cmp_status_ok then
+    cmp.event:on('confirm_done', cmp_autopairs.on_confirm_done())
+  end
+end)
 
 -- Smooth Scrolling
-local status_ok, neoscroll = pcall(require, 'neoscroll')
-if status_ok then
-  neoscroll.setup()
-else
-  vim.notify("Failed to load neoscroll", vim.log.levels.WARN)
-end
+setup_safe('neoscroll', function(neoscroll)
+  neoscroll.setup({
+    mappings = {'<C-u>', '<C-d>', '<C-b>', '<C-f>', '<C-y>', '<C-e>', 'zt', 'zz', 'zb'},
+    hide_cursor = true,
+    stop_eof = true,
+    respect_scrolloff = false,
+    cursor_scrolls_alone = true,
+    easing_function = "sine",
+    pre_hook = nil,
+    post_hook = nil,
+  })
+end)
 
 -- Session Management
-local status_ok, auto_session = pcall(require, 'auto-session')
-if status_ok then
+setup_safe('auto-session', function(auto_session)
   auto_session.setup {
+    log_level = "error",
     auto_session_enable_last_session = true,
     auto_session_enabled = true,
     auto_save_enabled = true,
     auto_restore_enabled = true,
+    auto_session_suppress_dirs = nil,
+    bypass_session_save_file_types = { "NvimTree", "toggleterm" },
   }
-else
-  vim.notify("Failed to load auto-session", vim.log.levels.WARN)
-end
+end)
 
--- FIXED: Improved Jupyter Notebook Support with better error handling
-local magma_exists, magma = pcall(require, 'magma-nvim')
+-- Jupyter Notebook Support
+local magma_exists, _ = pcall(require, 'magma-nvim')
 if magma_exists then
-  pcall(function() magma.setup() end)
-else
-  vim.notify("magma-nvim not available - install or remove from config", vim.log.levels.INFO)
+  vim.g.magma_automatically_open_output = false
+  vim.g.magma_image_provider = "none"
+  vim.keymap.set('n', '<Leader>me', ':MagmaEvaluateOperator<CR>', { noremap = true, silent = true })
+  vim.keymap.set('n', '<Leader>ml', ':MagmaEvaluateLine<CR>', { noremap = true, silent = true })
+  vim.keymap.set('n', '<Leader>mc', ':MagmaEvaluateCell<CR>', { noremap = true, silent = true })
+  vim.keymap.set('n', '<Leader>mo', ':MagmaShowOutput<CR>', { noremap = true, silent = true })
+  vim.keymap.set('n', '<Leader>md', ':MagmaDelete<CR>', { noremap = true, silent = true })
 end
 
 -- REPL Support
-local status_ok, iron = pcall(require, 'iron.core')
-if status_ok then
+setup_safe('iron.core', function(iron)
   iron.setup({
-    repl_definition = {
-      python = {
-        command = {"ipython", "--no-autoindent"}
+    config = {
+      repl_definition = {
+        python = {
+          command = {"ipython", "--no-autoindent"}
+        },
+        julia = {
+          command = {"julia"}
+        },
+        typescript = {
+          command = {"ts-node"}
+        },
+        javascript = {
+          command = {"node"}
+        },
+        rust = {
+          command = {"cargo", "run"}
+        },
       },
-      julia = {
-        command = {"julia"}
+      highlight = {
+        italic = true
       },
-      typescript = {
-        command = {"ts-node"}
-      },
+      ignore_blank_lines = true,
     },
-    highlight = {
-      italic = true
+    keymaps = {
+      send_motion = "<Leader>is",
+      visual_send = "<Leader>is",
+      send_line = "<Leader>il",
+      send_file = "<Leader>if",
+      send_mark = "<Leader>im",
+      send_until_cursor = "<Leader>iu",
+      clear = "<Leader>ic",
+      cr = "<Leader>i<CR>",
+      interrupt = "<Leader>ii",
+      exit = "<Leader>iq",
+      clear_console = "<Leader>ix",
     },
-    ignore_blank_lines = true,
   })
-else
-  vim.notify("Failed to load iron.nvim", vim.log.levels.WARN)
-end
+end)
 
 -- Set up diagnostics appearance
 vim.diagnostic.config({
@@ -342,6 +593,12 @@ vim.diagnostic.config({
   underline = true,
   update_in_insert = false,
   severity_sort = true,
+  float = {
+    border = "rounded",
+    source = "always",
+    header = "",
+    prefix = "",
+  },
 })
 
 -- Add diagnostic symbols
@@ -350,168 +607,40 @@ for type, icon in pairs(signs) do
   local hl = "DiagnosticSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
--- Update the theme configuration
-local function configure_theme()
-  -- Check if required plugins are available
-  local tokyonight_ok, tokyonight = pcall(require, "tokyonight")
-  local transparent_ok, transparent = pcall(require, "transparent")
-  local colorizer_ok, colorizer = pcall(require, "colorizer")
-  
-  if not tokyonight_ok then
-    vim.notify("TokyoNight theme not found - installing theme may be required", vim.log.levels.WARN)
-    vim.cmd("colorscheme default") -- Fallback
-    return
-  end
-  
-  -- Try both configuration methods for compatibility
-  -- Method 1: Global variables (older versions)
-  vim.g.tokyonight_style = "night"
-  vim.g.tokyonight_transparent = true
-  vim.g.tokyonight_terminal_colors = true
-  vim.g.tokyonight_italic_comments = true
-  vim.g.tokyonight_italic_keywords = true
-  vim.g.tokyonight_italic_functions = false
-  vim.g.tokyonight_italic_variables = false
-  vim.g.tokyonight_dark_sidebar = true
-  vim.g.tokyonight_dark_float = true
-  
-  -- Custom color overrides using vim global variables
-  vim.g.tokyonight_colors = {
-    bg = "#0f0f0f",
-    bg_dark = "#121212",
-    bg_float = "#121212",
-    bg_highlight = "#1a1a1a",
-    fg = "#e0e0e0",
-    orange = "#ff9e00",
-    yellow = "#ffb74d",
-    comment = "#756d66",
-    blue = "#ff7a00",     -- Use orange instead of blue
-    cyan = "#ffb74d",     -- Use light amber instead of cyan
-    purple = "#ff9e00",   -- Use amber instead of purple
-    green = "#50fa7b",    -- Keep green but adjust
-    red = "#ff4500",      -- Adjust red to be red-orange
-    border = "#ff9e00"
-  }
-  
-  -- Method 2: Try a simplified setup call (for newer versions)
-  local setup_ok, _ = pcall(function()
-    tokyonight.setup({
-      style = "night",
-      transparent = true,
-      terminal_colors = true,
-      styles = {
-        comments = "italic",
-        keywords = "italic",
-        functions = "NONE",
-        variables = "NONE"
-      }
-    })
-  end)
-  
-  -- Try to apply the theme with error handling
-  local theme_ok, theme_err = pcall(vim.cmd, "colorscheme tokyonight")
-  if not theme_ok then
-    vim.notify("Failed to apply TokyoNight theme: " .. tostring(theme_err), vim.log.levels.WARN)
-    vim.cmd("colorscheme default") -- Fallback
-    return
-  end
-  
-  -- Configure transparency plugin if available
-  if transparent_ok then
-    transparent.setup({
-      enable = true,
-      extra_groups = {
-        "NormalFloat",
-        "NvimTreeNormal",
-        "TelescopeNormal",
-      },
-    })
-  end
-  
-  -- Configure colorizer for showing colors in code if available
-  if colorizer_ok then
-    colorizer.setup({
-      '*', -- Enable for all filetypes
-      css = { css = true },
-    })
-  end
-  
-  -- Apply custom amber highlights directly regardless of theme setup method
-  -- This ensures our amber customizations are applied
-  local amber_highlights = {
-    CursorLine = { bg = "#1a1a1a" },
-    LineNr = { fg = "#3d3522" },
-    CursorLineNr = { fg = "#ff9e00" },
-    Function = { fg = "#ff9e00", bold = true },
-    Identifier = { fg = "#e0e0e0" },
-    Type = { fg = "#ffb74d" },
-    String = { fg = "#50fa7b" },
-    Number = { fg = "#ffcc80" },
-    Keyword = { fg = "#ff7a00", italic = true },
-    Comment = { fg = "#756d66", italic = true },
+
+-- Configure language-specific settings
+vim.cmd([[
+  augroup language_specific
+    autocmd!
+    " Python
+    autocmd FileType python setlocal tabstop=4 shiftwidth=4 expandtab
     
-    -- Diagnostic highlights
-    DiagnosticError = { fg = "#ff4500" },
-    DiagnosticWarn = { fg = "#ff7a00" },
-    DiagnosticInfo = { fg = "#ffb74d" },
-    DiagnosticHint = { fg = "#50fa7b" },
+    " Web development
+    autocmd FileType javascript,typescript,html,css,json setlocal tabstop=2 shiftwidth=2 expandtab
     
-    -- UI elements
-    StatusLine = { fg = "#e0e0e0", bg = "#0f0f0f" },
-    StatusLineNC = { fg = "#756d66", bg = "#0f0f0f" },
-    NormalFloat = { bg = "#121212" },
-    Pmenu = { fg = "#e0e0e0", bg = "#121212" },
-    PmenuSel = { fg = "#000000", bg = "#ff9e00" },
-    PmenuSbar = { bg = "#121212" },
-    PmenuThumb = { bg = "#3d3522" },
+    " Rust
+    autocmd FileType rust setlocal tabstop=4 shiftwidth=4 expandtab
     
-    -- NvimTree highlights
-    NvimTreeFolderName = { fg = "#ff9e00" },
-    NvimTreeFolderIcon = { fg = "#ff9e00" },
-    NvimTreeOpenedFolderName = { fg = "#ffb74d", bold = true },
-    NvimTreeIndentMarker = { fg = "#3d3522" },
-    NvimTreeGitDirty = { fg = "#ff7a00" },
-    NvimTreeGitNew = { fg = "#50fa7b" },
-    NvimTreeGitDeleted = { fg = "#ff4500" },
+    " Julia
+    autocmd FileType julia setlocal tabstop=4 shiftwidth=4 expandtab
     
-    -- Terminal colors
-    ToggleTerm = { bg = "#0f0f0f" },
-    ToggleTermBorder = { fg = "#ff9e00", bg = "#0f0f0f" },
-    
-    -- Telescope customization
-    TelescopePromptBorder = { fg = "#ff9e00" },
-    TelescopeResultsBorder = { fg = "#ff9e00" },
-    TelescopePreviewBorder = { fg = "#ff9e00" },
-    TelescopeSelectionCaret = { fg = "#ff9e00" },
-    TelescopeSelection = { fg = "#e0e0e0", bg = "#3d3522" },
-    
-    -- More syntax highlighting
-    Constant = { fg = "#ffb74d" },
-    Special = { fg = "#ff7a00" },
-    PreProc = { fg = "#ff9e00" },
-    Title = { fg = "#ff9e00", bold = true },
-  }
+    " Lua
+    autocmd FileType lua setlocal tabstop=2 shiftwidth=2 expandtab
+  augroup END
+]])
+
+-- Other useful commands
+vim.cmd([[
+  " Trim trailing whitespace on save
+  autocmd BufWritePre * :%s/\s\+$//e
   
-  -- Apply all custom highlights
-  for group, style in pairs(amber_highlights) do
-    vim.api.nvim_set_hl(0, group, style)
-  end
+  " Highlight yanked text
+  autocmd TextYankPost * silent! lua vim.highlight.on_yank {higroup="IncSearch", timeout=200}
   
-  -- Set terminal colors to match amber theme
-  vim.g.terminal_color_0 = "#121212"
-  vim.g.terminal_color_1 = "#ff4500"
-  vim.g.terminal_color_2 = "#50fa7b"
-  vim.g.terminal_color_3 = "#ffb74d"
-  vim.g.terminal_color_4 = "#ff7a00"
-  vim.g.terminal_color_5 = "#ff9e00"
-  vim.g.terminal_color_6 = "#8be9fd"
-  vim.g.terminal_color_7 = "#e0e0e0"
-  vim.g.terminal_color_8 = "#756d66"
-  vim.g.terminal_color_9 = "#ff5722"
-  vim.g.terminal_color_10 = "#69ff94"
-  vim.g.terminal_color_11 = "#ffcc80"
-  vim.g.terminal_color_12 = "#ff9800"
-  vim.g.terminal_color_13 = "#ffb74d"
-  vim.g.terminal_color_14 = "#a4ffff"
-  vim.g.terminal_color_15 = "#ffffff"
-end
+  " Remember folds
+  augroup remember_folds
+    autocmd!
+    autocmd BufWinLeave * if &ft != 'help' | mkview | endif
+    autocmd BufWinEnter * if &ft != 'help' | silent! loadview | endif
+  augroup END
+]])
