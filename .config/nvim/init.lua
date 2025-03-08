@@ -45,6 +45,12 @@ require('packer').startup(function(use)
   use {'jupyter-vim/jupyter-vim'}
   use {'maxmellon/vim-graphql'}
   use {'aklt/plantuml-syntax'}
+    -- Add these theme-related plugins
+  use 'folke/tokyonight.nvim'     -- Base for customization
+  use 'rktjmp/lush.nvim'          -- For theme customization
+  use 'norcalli/nvim-colorizer.lua' -- For color highlighting
+  use 'xiyaowong/nvim-transparent' -- For transparency
+end)
   
   -- Added colorscheme
   use {'morhetz/gruvbox'}
@@ -343,4 +349,359 @@ local signs = { Error = " ", Warn = " ", Hint = " ", Info = " " }
 for type, icon in pairs(signs) do
   local hl = "DiagnosticSign" .. type
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+end
+
+-- Theme Configuration
+local function configure_theme()
+  -- Configure TokyoNight with amber customizations
+  require("tokyonight").setup({
+    style = "night",
+    transparent = true,
+    terminal_colors = true,
+    styles = {
+      comments = { italic = true },
+      keywords = { italic = true },
+      functions = { bold = true },
+      variables = {},
+      sidebars = "dark",
+      floats = "dark",
+    },
+    sidebars = { "qf", "help", "terminal", "packer" },
+    on_colors = function(colors)
+      -- Override with amber accents
+      colors.bg = "#0f0f0f"
+      colors.bg_dark = "#121212"
+      colors.bg_float = "#121212"
+      colors.bg_highlight = "#1a1a1a"
+      colors.fg = "#e0e0e0"
+      
+      -- Primary accent colors (amber/orange)
+      colors.orange = "#ff9e00"
+      colors.yellow = "#ffb74d"
+      
+      -- Override theme colors with amber
+      colors.comment = "#756d66"
+      colors.blue = "#ff7a00"        -- Use orange instead of blue
+      colors.cyan = "#ffb74d"        -- Use light amber instead of cyan
+      colors.purple = "#ff9e00"      -- Use amber instead of purple
+      colors.green = "#50fa7b"       -- Keep green but adjust
+      colors.red = "#ff4500"         -- Adjust red to be red-orange
+      
+      -- UI elements
+      colors.border = "#ff9e00"
+      colors.selection_bg = "#3d3522" -- Dark amber for selections
+      colors.gitSigns = {
+        add = "#50fa7b",
+        change = "#ff9e00",
+        delete = "#ff4500"
+      }
+    end,
+    on_highlights = function(hl, c)
+      -- Custom highlights
+      hl.CursorLine = { bg = "#1a1a1a" }
+      hl.LineNr = { fg = "#3d3522" }
+      hl.CursorLineNr = { fg = "#ff9e00" }
+      
+      -- Function names in amber
+      hl.Function = { fg = c.orange, style = { bold = true } }
+      
+      -- LSP highlights
+      hl.DiagnosticError = { fg = "#ff4500" }
+      hl.DiagnosticWarn = { fg = "#ff7a00" }
+      hl.DiagnosticInfo = { fg = "#ffb74d" }
+      hl.DiagnosticHint = { fg = "#50fa7b" }
+      
+      -- Telescope customization
+      hl.TelescopePromptBorder = { fg = c.orange }
+      hl.TelescopeResultsBorder = { fg = c.orange }
+      hl.TelescopePreviewBorder = { fg = c.orange }
+      hl.TelescopeSelectionCaret = { fg = c.orange }
+      hl.TelescopeSelection = { fg = c.fg, bg = "#3d3522" }
+      
+      -- Status line
+      hl.StatusLine = { fg = c.fg, bg = c.bg_dark }
+      hl.StatusLineNC = { fg = c.comment, bg = c.bg_dark }
+    end,
+  })
+  
+  -- Apply the theme
+  vim.cmd[[colorscheme tokyonight]]
+  
+  -- Configure transparency plugin
+  require("transparent").setup({
+    enable = true,
+    extra_groups = {
+      "NormalFloat",
+      "NvimTreeNormal",
+      "TelescopeNormal",
+    },
+  })
+  
+  -- Configure colorizer for showing colors in code
+  require("colorizer").setup({
+    '*'; -- Enable for all filetypes
+    css = { css = true; };
+  })
+end
+
+-- Initialize theme with error handling
+local status_ok, _ = pcall(configure_theme)
+if not status_ok then
+  vim.notify("Failed to set up theme - plugins may need to be installed", vim.log.levels.WARN)
+  vim.cmd "colorscheme default" -- Fallback
+end
+
+-- Configure cursor to be an orange block
+vim.opt.guicursor = "n-v-c:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
+vim.api.nvim_set_hl(0, "Cursor", { bg = "#ff9e00", fg = "#000000" })
+
+-- Configure Lualine with matching theme
+local status_ok, lualine = pcall(require, 'lualine')
+if status_ok then
+  lualine.setup {
+    options = {
+      theme = 'tokyonight',
+      component_separators = { left = '', right = '' },
+      section_separators = { left = '', right = '' },
+    },
+    sections = {
+      lualine_a = {'mode'},
+      lualine_b = {'branch', 'diff', 'diagnostics'},
+      lualine_c = {'filename'},
+      lualine_x = {'filetype'},
+      lualine_y = {'progress'},
+      lualine_z = {'location'}
+    },
+    inactive_sections = {
+      lualine_a = {},
+      lualine_b = {},
+      lualine_c = {'filename'},
+      lualine_x = {'location'},
+      lualine_y = {},
+      lualine_z = {}
+    },
+  }
+else
+  vim.notify("Failed to load lualine", vim.log.levels.WARN)
+end
+
+-- Configure bufferline to match theme
+local status_ok, bufferline = pcall(require, 'bufferline')
+if status_ok then
+  bufferline.setup {
+    options = {
+      separator_style = "slant",
+      offsets = {{filetype = "NvimTree", text = "Explorer", text_align = "center"}},
+      show_buffer_close_icons = true,
+      show_close_icon = true,
+      color_icons = true,
+      diagnostics = "nvim_lsp",
+    },
+    highlights = {
+      fill = {
+        bg = "#0f0f0f"
+      },
+      background = {
+        bg = "#121212"
+      },
+      tab = {
+        bg = "#121212"
+      },
+      tab_selected = {
+        fg = "#ff9e00",
+        bg = "#0f0f0f",
+        bold = true
+      },
+      buffer_selected = {
+        fg = "#ff9e00",
+        bg = "#0f0f0f",
+        bold = true
+      },
+      separator = {
+        fg = "#121212",
+        bg = "#121212",
+      },
+      separator_selected = {
+        fg = "#121212",
+        bg = "#0f0f0f",
+      },
+      indicator_selected = {
+        fg = "#ff9e00",
+      },
+    }
+  }
+else
+  vim.notify("Failed to load bufferline", vim.log.levels.WARN)
+end
+
+-- Configure NvimTree colors
+local status_ok, nvim_tree = pcall(require, 'nvim-tree')
+if status_ok then
+  nvim_tree.setup {
+    view = {
+      side = "left",
+      width = 30,
+    },
+    renderer = {
+      add_trailing = false,
+      group_empty = false,
+      highlight_git = true,
+      highlight_opened_files = "name",
+      root_folder_modifier = ":~",
+      indent_markers = {
+        enable = true,
+        icons = {
+          corner = "└ ",
+          edge = "│ ",
+          none = "  ",
+        },
+      },
+      icons = {
+        webdev_colors = true,
+        git_placement = "before",
+        padding = " ",
+        symlink_arrow = " ➛ ",
+        show = {
+          file = true,
+          folder = true,
+          folder_arrow = true,
+          git = true,
+        },
+        glyphs = {
+          default = "",
+          symlink = "",
+          folder = {
+            arrow_closed = "",
+            arrow_open = "",
+            default = "",
+            open = "",
+            empty = "",
+            empty_open = "",
+            symlink = "",
+            symlink_open = "",
+          },
+          git = {
+            unstaged = "✗",
+            staged = "✓",
+            unmerged = "",
+            renamed = "➜",
+            untracked = "★",
+            deleted = "",
+            ignored = "◌",
+          },
+        },
+      },
+    },
+    filters = {
+      dotfiles = false,
+    },
+  }
+  
+  -- Set NvimTree colors
+  vim.cmd [[highlight NvimTreeFolderName guifg=#ff9e00]]
+  vim.cmd [[highlight NvimTreeFolderIcon guifg=#ff9e00]]
+  vim.cmd [[highlight NvimTreeOpenedFolderName guifg=#ffb74d gui=bold]]
+  vim.cmd [[highlight NvimTreeIndentMarker guifg=#3d3522]]
+  vim.cmd [[highlight NvimTreeGitDirty guifg=#ff7a00]]
+  vim.cmd [[highlight NvimTreeGitNew guifg=#50fa7b]]
+  vim.cmd [[highlight NvimTreeGitDeleted guifg=#ff4500]]
+else
+  vim.notify("Failed to load nvim-tree", vim.log.levels.WARN)
+end
+
+-- Configure toggleterm to match theme
+local status_ok, toggleterm = pcall(require, 'toggleterm')
+if status_ok then
+  toggleterm.setup {
+    size = 20,
+    open_mapping = [[<C-\>]],
+    shade_terminals = true,
+    shading_factor = 2,
+    direction = "float",
+    float_opts = {
+      border = "curved",
+      winblend = 0,
+      highlights = {
+        border = "Normal",
+        background = "Normal",
+      }
+    },
+    highlights = {
+      Normal = {
+        guibg = "#0f0f0f",
+      },
+      NormalFloat = {
+        link = "Normal"
+      },
+      FloatBorder = {
+        guifg = "#ff9e00",
+        guibg = "#0f0f0f",
+      },
+    }
+  }
+  
+  -- Set terminal colors to match theme
+  vim.g.terminal_color_0 = "#121212"
+  vim.g.terminal_color_1 = "#ff4500"
+  vim.g.terminal_color_2 = "#50fa7b"
+  vim.g.terminal_color_3 = "#ffb74d"
+  vim.g.terminal_color_4 = "#ff7a00"
+  vim.g.terminal_color_5 = "#ff9e00"
+  vim.g.terminal_color_6 = "#8be9fd"
+  vim.g.terminal_color_7 = "#e0e0e0"
+  vim.g.terminal_color_8 = "#756d66"
+  vim.g.terminal_color_9 = "#ff5722"
+  vim.g.terminal_color_10 = "#69ff94"
+  vim.g.terminal_color_11 = "#ffcc80"
+  vim.g.terminal_color_12 = "#ff9800"
+  vim.g.terminal_color_13 = "#ffb74d"
+  vim.g.terminal_color_14 = "#a4ffff"
+  vim.g.terminal_color_15 = "#ffffff"
+else
+  vim.notify("Failed to load toggleterm", vim.log.levels.WARN)
+end
+
+-- Configure telescope to match theme
+local status_ok, telescope = pcall(require, 'telescope')
+if status_ok then
+  telescope.setup {
+    defaults = {
+      prompt_prefix = " > ",
+      selection_caret = "  ",
+      entry_prefix = "  ",
+      initial_mode = "insert",
+      selection_strategy = "reset",
+      sorting_strategy = "descending",
+      layout_strategy = "horizontal",
+      layout_config = {
+        horizontal = {
+          prompt_position = "bottom",
+          preview_width = 0.55,
+          results_width = 0.8,
+        },
+        vertical = {
+          mirror = false,
+        },
+        width = 0.87,
+        height = 0.80,
+        preview_cutoff = 120,
+      },
+      path_display = { "truncate" },
+      winblend = 0,
+      border = {},
+      borderchars = { "─", "│", "─", "│", "╭", "╮", "╯", "╰" },
+      color_devicons = true,
+      set_env = { ["COLORTERM"] = "truecolor" },
+    },
+    extensions = {
+      project = {
+        hidden_files = true,
+      },
+    },
+  }
+  
+  -- Load telescope extensions
+  pcall(telescope.load_extension, 'project')
+else
+  vim.notify("Failed to load telescope", vim.log.levels.WARN)
 end
