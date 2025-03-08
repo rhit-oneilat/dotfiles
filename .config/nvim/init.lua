@@ -636,11 +636,4 @@ vim.cmd([[
   
   " Highlight yanked text
   autocmd TextYankPost * silent! lua vim.highlight.on_yank {higroup="IncSearch", timeout=200}
-  
-  " Remember folds
-  augroup remember_folds
-    autocmd!
-    autocmd BufWinLeave * if &ft != 'help' | mkview | endif
-    autocmd BufWinEnter * if &ft != 'help' | silent! loadview | endif
-  augroup END
 ]])
