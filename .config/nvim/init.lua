@@ -62,9 +62,6 @@ vim.o.expandtab = true
 vim.o.smartindent = true
 vim.o.termguicolors = true -- Added for better color support
 
--- Apply colorscheme
-vim.cmd [[colorscheme gruvbox]]
-
 -- LSP Config
 local lspconfig = require('lspconfig')
 
