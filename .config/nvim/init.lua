@@ -352,6 +352,7 @@ for type, icon in pairs(signs) do
 end
 
 -- FIXED: Theme Configuration - Fixed syntax and improved structure
+-- Fixed Theme Configuration 
 local function configure_theme()
   -- Check if required plugins are available
   local tokyonight_ok, tokyonight = pcall(require, "tokyonight")
@@ -402,12 +403,11 @@ local function configure_theme()
       colors.border = "#ff9e00"
       colors.selection_bg = "#3d3522" -- Dark amber for selections
       
-      -- FIXED: Add missing git table
-      colors.git = {
-        add = "#50fa7b",
-        change = "#ff9e00",
-        delete = "#ff4500"
-      }
+      -- FIXED: Properly initialize git colors
+      colors.git = colors.git or {}
+      colors.git.add = "#50fa7b"
+      colors.git.change = "#ff9e00"
+      colors.git.delete = "#ff4500"
     end,
     on_highlights = function(hl, c)
       -- Custom highlights
@@ -461,12 +461,66 @@ local function configure_theme()
   end
 end
 
--- Initialize theme with error handling
-local status_ok, _ = pcall(configure_theme)
+-- Initialize theme with better error handling
+local status_ok, error_msg = pcall(configure_theme)
 if not status_ok then
-  vim.notify("Failed to set up theme - check for errors in theme configuration", vim.log.levels.WARN)
+  vim.notify("Failed to set up theme: " .. tostring(error_msg), vim.log.levels.WARN)
   vim.cmd("colorscheme default") -- Fallback
 end
+
+-- Configure cursor to be an orange block
+vim.opt.guicursor = "n-v-c:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
+vim.api.nvim_set_hl(0, "Cursor", { bg = "#ff9e00", fg = "#000000" })
+
+-- Configure Lualine with matching theme (moved after theme is applied)
+vim.defer_fn(function()
+  local status_ok, lualine = pcall(require, 'lualine')
+  if status_ok then
+    lualine.setup {
+      options = {
+        theme = 'tokyonight',
+        component_separators = { left = '', right = '' },
+        section_separators = { left = '', right = '' },
+      },
+      sections = {
+        lualine_a = {'mode'},
+        lualine_b = {'branch', 'diff', 'diagnostics'},
+        lualine_c = {'filename'},
+        lualine_x = {'filetype'},
+        lualine_y = {'progress'},
+        lualine_z = {'location'}
+      },
+      inactive_sections = {
+        lualine_a = {},
+        lualine_b = {},
+        lualine_c = {'filename'},
+        lualine_x = {'location'},
+        lualine_y = {},
+        lualine_z = {}
+      },
+    }
+  else
+    vim.notify("Failed to load lualine", vim.log.levels.WARN)
+  end
+end, 100)  -- Small delay to ensure theme is applied first
+
+-- Create an autocmd to set NvimTree colors after colorscheme changes
+vim.api.nvim_create_autocmd("ColorScheme", {
+  pattern = "*",
+  callback = function()
+    vim.cmd([[highlight NvimTreeFolderName guifg=#ff9e00]])
+    vim.cmd([[highlight NvimTreeFolderIcon guifg=#ff9e00]])
+    vim.cmd([[highlight NvimTreeOpenedFolderName guifg=#ffb74d gui=bold]])
+    vim.cmd([[highlight NvimTreeIndentMarker guifg=#3d3522]])
+    vim.cmd([[highlight NvimTreeGitDirty guifg=#ff7a00]])
+    vim.cmd([[highlight NvimTreeGitNew guifg=#50fa7b]])
+    vim.cmd([[highlight NvimTreeGitDeleted guifg=#ff4500]])
+    
+    -- Also fix ToggleTerm highlights
+    vim.api.nvim_set_hl(0, "ToggleTerm", { bg = "#0f0f0f" })
+    vim.api.nvim_set_hl(0, "ToggleTermBorder", { fg = "#ff9e00", bg = "#0f0f0f" })
+  end
+})
 
 -- Configure cursor to be an orange block
 vim.opt.guicursor = "n-v-c:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
