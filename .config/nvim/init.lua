@@ -12,7 +12,10 @@ vim.g.mapleader = " "
 require('packer').startup(function(use)
   -- Package manager
   use 'wbthomason/packer.nvim'
-  
+
+  -- Markdown files
+  use 'henriklovhaug/Preview.nvim'
+    
   -- LSP and completion
   use 'neovim/nvim-lspconfig'
   use 'hrsh7th/nvim-cmp'
