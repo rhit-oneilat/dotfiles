@@ -351,7 +351,7 @@ for type, icon in pairs(signs) do
   vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
 end
 
--- Fixed Theme Configuration with compatibility fixes
+-- Update the theme configuration
 local function configure_theme()
   -- Check if required plugins are available
   local tokyonight_ok, tokyonight = pcall(require, "tokyonight")
@@ -365,77 +365,34 @@ local function configure_theme()
   end
   
   -- Configure TokyoNight with amber customizations
-  -- FIXED: Use the API that your plugin version supports
-  tokyonight.setup({
-    style = "night",
-    transparent = true,
-    terminal_colors = true,
-    styles = {
-      comments = "italic",
-      keywords = "italic",
-      functions = "bold",
-      variables = "NONE",
-      sidebars = "dark",
-      floats = "dark",
-    },
-    sidebars = { "qf", "help", "terminal", "packer" },
-    on_colors = function(colors)
-      -- Override with amber accents
-      colors.bg = "#0f0f0f"
-      colors.bg_dark = "#121212"
-      colors.bg_float = "#121212"
-      colors.bg_highlight = "#1a1a1a"
-      colors.fg = "#e0e0e0"
-      
-      -- Primary accent colors (amber/orange)
-      colors.orange = "#ff9e00"
-      colors.yellow = "#ffb74d"
-      
-      -- Override theme colors with amber
-      colors.comment = "#756d66"
-      colors.blue = "#ff7a00"        -- Use orange instead of blue
-      colors.cyan = "#ffb74d"        -- Use light amber instead of cyan
-      colors.purple = "#ff9e00"      -- Use amber instead of purple
-      colors.green = "#50fa7b"       -- Keep green but adjust
-      colors.red = "#ff4500"         -- Adjust red to be red-orange
-      
-      -- UI elements
-      colors.border = "#ff9e00"
-      colors.selection_bg = "#3d3522" -- Dark amber for selections
-      
-      -- FIXED: Properly initialize git colors
-      colors.git = colors.git or {}
-      colors.git.add = "#50fa7b"
-      colors.git.change = "#ff9e00"
-      colors.git.delete = "#ff4500"
-    end,
-    on_highlights = function(hl, c)
-      -- Custom highlights - FIXED: Use format compatible with your plugin version
-      hl.CursorLine = { bg = "#1a1a1a" }
-      hl.LineNr = { fg = "#3d3522" }
-      hl.CursorLineNr = { fg = "#ff9e00" }
-      
-      -- Function names in amber
-      hl.Function = { fg = c.orange, bold = true }
-      
-      -- LSP highlights
-      hl.DiagnosticError = { fg = "#ff4500" }
-      hl.DiagnosticWarn = { fg = "#ff7a00" }
-      hl.DiagnosticInfo = { fg = "#ffb74d" }
-      hl.DiagnosticHint = { fg = "#50fa7b" }
-      
-      -- Telescope customization
-      hl.TelescopePromptBorder = { fg = c.orange }
-      hl.TelescopeResultsBorder = { fg = c.orange }
-      hl.TelescopePreviewBorder = { fg = c.orange }
-      hl.TelescopeSelectionCaret = { fg = c.orange }
-      hl.TelescopeSelection = { fg = c.fg, bg = "#3d3522" }
-      
-      -- Status line
-      hl.StatusLine = { fg = c.fg, bg = c.bg_dark }
-      hl.StatusLineNC = { fg = c.comment, bg = c.bg_dark }
-    end,
-  })
+  -- Let's use the correct API for the version you have
+  vim.g.tokyonight_style = "night"
+  vim.g.tokyonight_transparent = true
+  vim.g.tokyonight_terminal_colors = true
+  vim.g.tokyonight_italic_comments = true
+  vim.g.tokyonight_italic_keywords = true
+  vim.g.tokyonight_italic_functions = false
+  vim.g.tokyonight_italic_variables = false
+  vim.g.tokyonight_dark_sidebar = true
+  vim.g.tokyonight_dark_float = true
+  
+  -- Custom color overrides using vim global variables
+  vim.g.tokyonight_colors = {
+    bg = "#0f0f0f",
+    bg_dark = "#121212",
+    bg_float = "#121212",
+    bg_highlight = "#1a1a1a",
+    fg = "#e0e0e0",
+    orange = "#ff9e00",
+    yellow = "#ffb74d",
+    comment = "#756d66",
+    blue = "#ff7a00",     -- Use orange instead of blue
+    cyan = "#ffb74d",     -- Use light amber instead of cyan
+    purple = "#ff9e00",   -- Use amber instead of purple
+    green = "#50fa7b",    -- Keep green but adjust
+    red = "#ff4500",      -- Adjust red to be red-orange
+    border = "#ff9e00"
+  }
   
   -- Try to apply the theme with error handling
   local theme_ok, theme_err = pcall(vim.cmd, "colorscheme tokyonight")
@@ -465,8 +422,7 @@ local function configure_theme()
     })
   end
   
-  -- MANUAL FALLBACK: Apply key highlight customizations directly if the theme loaded
-  -- but on_highlights didn't work
+  -- Apply key highlight customizations directly
   vim.api.nvim_set_hl(0, "Function", { fg = "#ff9e00", bold = true })
   vim.api.nvim_set_hl(0, "Cursor", { bg = "#ff9e00", fg = "#000000" })
   vim.api.nvim_set_hl(0, "CursorLine", { bg = "#1a1a1a" })
@@ -486,31 +442,3 @@ local function configure_theme()
   vim.api.nvim_set_hl(0, "ToggleTerm", { bg = "#0f0f0f" })
   vim.api.nvim_set_hl(0, "ToggleTermBorder", { fg = "#ff9e00", bg = "#0f0f0f" })
 end
-
--- Initialize theme with better error handling
-local theme_status, theme_error = pcall(configure_theme)
-if not theme_status then
-  vim.notify("Failed to configure theme: " .. tostring(theme_error), vim.log.levels.WARN)
-  vim.cmd("colorscheme default") -- Ultimate fallback
-end
-
--- Configure cursor to be an orange block
-vim.opt.guicursor = "n-v-c:block-Cursor,i-ci-ve:ver25-Cursor,r-cr-o:hor20-Cursor"
-
--- Set terminal colors to match theme
-vim.g.terminal_color_0 = "#121212"
-vim.g.terminal_color_1 = "#ff4500"
-vim.g.terminal_color_2 = "#50fa7b"
-vim.g.terminal_color_3 = "#ffb74d"
-vim.g.terminal_color_4 = "#ff7a00"
-vim.g.terminal_color_5 = "#ff9e00"
-vim.g.terminal_color_6 = "#8be9fd"
-vim.g.terminal_color_7 = "#e0e0e0"
-vim.g.terminal_color_8 = "#756d66"
-vim.g.terminal_color_9 = "#ff5722"
-vim.g.terminal_color_10 = "#69ff94"
-vim.g.terminal_color_11 = "#ffcc80"
-vim.g.terminal_color_12 = "#ff9800"
-vim.g.terminal_color_13 = "#ffb74d"
-vim.g.terminal_color_14 = "#a4ffff"
-vim.g.terminal_color_15 = "#ffffff"
