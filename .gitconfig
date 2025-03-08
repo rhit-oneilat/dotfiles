@@ -1,0 +1,7 @@
+[user]
+  name = rhit-oneilat
+  email = oneilat@rose-hulman.edu
+[alias]
+  co = checkout
+  st = status
+  br = branch
