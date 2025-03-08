@@ -514,15 +514,3 @@ vim.g.terminal_color_12 = "#ff9800"
 vim.g.terminal_color_13 = "#ffb74d"
 vim.g.terminal_color_14 = "#a4ffff"
 vim.g.terminal_color_15 = "#ffffff"
-  
-  -- Create autocmd to apply toggleterm highlights after colorscheme changes
-  vim.api.nvim_create_autocmd("ColorScheme", {
-    pattern = "*",
-    callback = function()
-      vim.api.nvim_set_hl(0, "ToggleTerm", { bg = "#0f0f0f" })
-      vim.api.nvim_set_hl(0, "ToggleTermBorder", { fg = "#ff9e00", bg = "#0f0f0f" })
-    end
-  })
-else
-  vim.notify("Failed to load toggleterm", vim.log.levels.WARN)
-end
