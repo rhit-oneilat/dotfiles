@@ -1,0 +1,8 @@
+# base16-amber.yaml
+scheme: "Amber Dark"
+author: "Custom Theme"
+base00: "0f0f0f" # Default Background
+base01: "121212" # Lighter Background (Used for status bars, line number and folding marks)
+base02: "1a1a1a" # Selection Background
+base03: "756d66" # Comments, Invisibles, Line Highlighting
+base04: "a5a5a5" # Dark Foreground (Used for status bars)
