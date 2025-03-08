@@ -4,3 +4,4 @@ alias gs='git status'
 alias v='nvim'
 alias ff='firefox & exit'
 source ~/.github_token
+eval "$(starship init bash)"
