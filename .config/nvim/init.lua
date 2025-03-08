@@ -27,6 +27,10 @@ require('packer').startup(function(use)
   
   -- Treesitter for better syntax highlighting
   use {'nvim-treesitter/nvim-treesitter', run = ':TSUpdate'}
+
+  -- LaTeX
+  use { "lervag/vimtex" }
+
   
   -- Navigation and search
   use {'nvim-telescope/telescope.nvim', requires = {{'nvim-lua/plenary.nvim'}}}
@@ -310,6 +314,13 @@ setup_safe('bufferline', function(bufferline)
     }
   }
 end)
+
+-- LaTeX Setup
+vim.g.vimtex_view_method = 'zathura' -- Change to 'skim' if on macOS
+vim.g.vimtex_compiler_method = 'latexmk'
+vim.g.tex_flavor = 'latex'
+vim.g.vimtex_quickfix_mode = 0
+
 
 -- Code Runner Setup
 setup_safe('code_runner', function(code_runner)
