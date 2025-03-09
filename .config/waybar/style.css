@@ -1,170 +1,246 @@
-/* ~/.config/waybar/style.css */
 * {
     /* Gruvbox dark colors with amber accent */
-    --bg0: #282828;
-    --bg0-soft: #32302f;
-    --bg1: #3c3836;
-    --bg2: #504945;
-    --bg3: #665c54;
-    --bg4: #7c6f64;
-    
-    --fg0: #fbf1c7;
-    --fg1: #ebdbb2;
-    --fg2: #d5c4a1;
-    --fg3: #bdae93;
-    --fg4: #a89984;
-    
-    /* Amber accents */
-    --amber: #fe8019;
-    --amber-light: #fabd2f;
-    --amber-dark: #d65d0e;
-    
-    /* Other colors */
-    --red: #fb4934;
-    --green: #b8bb26;
-    --blue: #83a598;
-    
-    border: none;
-    border-radius: 0;
-    font-family: "IBM Plex Mono", "Material Icons";
+    font-family: "IBM Plex Mono", "Material Icons", FontAwesome, Roboto, Helvetica, Arial, sans-serif;
     font-size: 13px;
     min-height: 0;
+    border: none;
+    border-radius: 0;
 }
 
 window#waybar {
-    background-color: var(--bg0);
-    color: var(--fg1);
+    background-color: rgba(40, 40, 40, 0.85);  /* Semi-transparent background */
+    border-bottom: 3px solid #3c3836;
+    color: #fbf1c7;
     transition-property: background-color;
     transition-duration: .5s;
-    border-bottom: 2px solid var(--bg1);
 }
 
 window#waybar.hidden {
     opacity: 0.2;
 }
 
-#workspaces button {
-    background-color: var(--bg1);
-    color: var(--fg2);
-    margin: 4px 2px;
-    padding: 0 6px;
-    border-radius: 4px;
+window#waybar.termite {
+    background-color: #282828;
+}
+
+window#waybar.chromium {
+    background-color: #282828;
+    border: none;
+}
+
+button {
     box-shadow: inset 0 -3px transparent;
-    transition: all 0.3s cubic-bezier(.55,-.01,.19,.98);
+    border: none;
+    border-radius: 0;
 }
 
-#workspaces button.active {
-    background-color: var(--bg3);
-    color: var(--amber-light);
-    box-shadow: inset 0 -3px var(--amber);
+button:hover {
+    background: inherit;
+    box-shadow: inset 0 -3px #fe8019;
 }
 
-#workspaces button.urgent {
-    background-color: var(--red);
-    color: var(--bg0);
+#wireplumber:hover {
+    background-color: #d65d0e;
+}
+
+#workspaces button {
+    padding: 0 5px;
+    background-color: transparent;
+    color: #fbf1c7;
 }
 
 #workspaces button:hover {
-    background: var(--bg2);
-    box-shadow: inset 0 -3px var(--amber-dark);
-    color: var(--fg1);
+    background: rgba(254, 128, 25, 0.2);  /* Amber tint on hover */
+    box-shadow: inset 0 -3px #fe8019;
 }
 
-#window {
-    color: var(--fg2);
-    margin: 0 6px;
-    padding-left: 10px;
-    border-left: 2px solid var(--bg2);
+#workspaces button.focused {
+    background-color: #504945;
+    box-shadow: inset 0 -3px #fe8019;
 }
 
+#workspaces button.urgent {
+    background-color: #fb4934;
+}
+
+#mode {
+    background-color: #504945;
+    box-shadow: inset 0 -3px #fe8019;
+}
+
+/* Common module styling with rounded corners */
 #clock,
 #battery,
 #cpu,
 #memory,
 #disk,
 #temperature,
+#backlight,
 #network,
-#pulseaudio,
+#wireplumber,
 #custom-media,
+#custom-weather,
+#custom-updates,
+#custom-clipboard,
 #tray,
 #mode,
-#idle_inhibitor {
+#idle_inhibitor,
+#scratchpad,
+#power-profiles-daemon,
+#mpd {
     padding: 0 10px;
+    margin: 4px 4px;
+    color: #fbf1c7;
+    border-radius: 6px;
+}
+
+#window,
+#workspaces {
     margin: 0 4px;
-    background-color: var(--bg1);
-    color: var(--fg2);
-    border-radius: 4px;
+}
+
+.modules-left > widget:first-child > #workspaces {
+    margin-left: 0;
+}
+
+.modules-right > widget:last-child > #workspaces {
+    margin-right: 0;
 }
 
 #clock {
-    font-weight: bold;
-    color: var(--amber-light);
-    background-color: var(--bg2);
+    background-color: #504945;
 }
 
 #battery {
-    color: var(--green);
+    background-color: #ebdbb2;
+    color: #282828;
 }
 
-#battery.charging, 
-#battery.plugged {
-    color: var(--green);
-    background-color: var(--bg1);
+#battery.charging, #battery.plugged {
+    color: #282828;
+    background-color: #b8bb26;
+}
+
+@keyframes blink {
+    to {
+        background-color: #fb4934;
+        color: #fbf1c7;
+    }
 }
 
 #battery.critical:not(.charging) {
-    color: var(--bg0);
-    background-color: var(--red);
+    background-color: #fb4934;
+    color: #fbf1c7;
     animation-name: blink;
     animation-duration: 0.5s;
-    animation-timing-function: linear;
+    animation-timing-function: steps(12);
     animation-iteration-count: infinite;
     animation-direction: alternate;
 }
 
+#power-profiles-daemon {
+    padding-right: 15px;
+}
+
+#power-profiles-daemon.performance {
+    background-color: #fb4934;
+    color: #fbf1c7;
+}
+
+#power-profiles-daemon.balanced {
+    background-color: #83a598;
+    color: #282828;
+}
+
+#power-profiles-daemon.power-saver {
+    background-color: #b8bb26;
+    color: #282828;
+}
+
+label:focus {
+    background-color: #282828;
+}
+
 #cpu {
-    color: var(--amber);
-    background-color: var(--bg1);
+    background-color: #b8bb26;
+    color: #282828;
 }
 
 #memory {
-    color: var(--amber-light);
-    background-color: var(--bg1);
+    background-color: #b16286;
+}
+
+#disk {
+    background-color: #d65d0e;
+}
+
+#backlight {
+    background-color: #665c54;
 }
 
 #network {
-    color: var(--blue);
-    background-color: var(--bg1);
+    background-color: #83a598;
 }
 
 #network.disconnected {
-    color: var(--fg3);
-    background-color: var(--bg2);
+    background-color: #fb4934;
 }
 
-#pulseaudio {
-    color: var(--amber);
-    background-color: var(--bg1);
+#wireplumber {
+    background-color: #fabd2f;
+    color: #282828;
 }
 
-#pulseaudio.muted {
-    color: var(--fg4);
-    background-color: var(--bg2);
+#wireplumber.muted {
+    background-color: #7c6f64;
+    color: #fbf1c7;
+}
+
+#custom-media {
+    background-color: #8ec07c;
+    color: #282828;
+    min-width: 100px;
+}
+
+#custom-media.custom-spotify {
+    background-color: #8ec07c;
+}
+
+#custom-media.custom-vlc {
+    background-color: #fe8019;
+}
+
+/* New custom modules */
+#custom-weather {
+    background-color: #458588;
+    color: #fbf1c7;
+}
+
+#custom-updates {
+    background-color: #98971a;
+    color: #fbf1c7;
+}
+
+#custom-updates.pending {
+    background-color: #fabd2f;
+    color: #282828;
+}
+
+#custom-clipboard {
+    background-color: #689d6a;
+    color: #fbf1c7;
 }
 
 #temperature {
-    color: var(--amber-dark);
-    background-color: var(--bg1);
+    background-color: #fe8019;
 }
 
 #temperature.critical {
-    color: var(--bg0);
-    background-color: var(--red);
+    background-color: #fb4934;
 }
 
 #tray {
-    background-color: var(--bg2);
-    padding: 0 8px;
+    background-color: #83a598;
 }
 
 #tray > .passive {
@@ -173,22 +249,116 @@ window#waybar.hidden {
 
 #tray > .needs-attention {
     -gtk-icon-effect: highlight;
-    background-color: var(--red);
+    background-color: #fb4934;
 }
 
-/* Add transition effect for hover */
+#idle_inhibitor {
+    background-color: #32302f;
+}
+
+#idle_inhibitor.activated {
+    background-color: #ebdbb2;
+    color: #282828;
+}
+
+#mpd {
+    background-color: #8ec07c;
+    color: #282828;
+}
+
+#mpd.disconnected {
+    background-color: #fb4934;
+}
+
+#mpd.stopped {
+    background-color: #665c54;
+}
+
+#mpd.paused {
+    background-color: #689d6a;
+}
+
+#language {
+    background: #689d6a;
+    color: #282828;
+    padding: 0 5px;
+    margin: 0 5px;
+    min-width: 16px;
+    border-radius: 6px;
+}
+
+#keyboard-state {
+    background: #8ec07c;
+    color: #282828;
+    padding: 0 0px;
+    margin: 0 5px;
+    min-width: 16px;
+    border-radius: 6px;
+}
+
+#keyboard-state > label {
+    padding: 0 5px;
+}
+
+#keyboard-state > label.locked {
+    background: rgba(40, 40, 40, 0.2);
+}
+
+#scratchpad {
+    background: rgba(40, 40, 40, 0.2);
+}
+
+#scratchpad.empty {
+    background-color: transparent;
+}
+
+#privacy {
+    padding: 0;
+}
+
+#privacy-item {
+    padding: 0 5px;
+    color: #fbf1c7;
+    border-radius: 6px;
+    margin: 4px 2px;
+}
+
+#privacy-item.screenshare {
+    background-color: #d65d0e;
+}
+
+#privacy-item.audio-in {
+    background-color: #98971a;
+}
+
+#privacy-item.audio-out {
+    background-color: #458588;
+}
+
+/* Tooltip styling */
+tooltip {
+    background-color: #282828;
+    border: 1px solid #fe8019;
+    border-radius: 6px;
+}
+
+tooltip label {
+    color: #fbf1c7;
+}
+
+/* Hover effects for all modules */
+#clock:hover,
+#battery:hover,
 #cpu:hover,
 #memory:hover,
-#battery:hover,
 #temperature:hover,
+#backlight:hover,
 #network:hover,
-#pulseaudio:hover {
-    background-color: var(--bg2);
-}
-
-@keyframes blink {
-    to {
-        background-color: var(--red);
-        color: var(--bg0);
-    }
+#tray:hover,
+#idle_inhibitor:hover,
+#custom-weather:hover,
+#custom-updates:hover,
+#custom-clipboard:hover {
+    background-color: #3c3836;
+    border-bottom: 3px solid #fe8019;
 }

@@ -1,58 +1,89 @@
-// ~/.config/waybar/config
 {
     "layer": "top",
     "position": "top",
     "height": 30,
     "spacing": 4,
-    "modules-left": ["hyprland/workspaces", "hyprland/window"],
-    "modules-center": ["clock"],
-    "modules-right": ["tray", "network", "cpu", "memory", "temperature", "battery", "pulseaudio"],
-    "hyprland/workspaces": {
+    "margin-top": 6,
+    "margin-left": 8,
+    "margin-right": 8,
+
+    "modules-left": ["sway/workspaces", "sway/mode", "sway/scratchpad"],
+    "modules-center": ["sway/window"],
+    "modules-right": [
+        "custom/weather",
+        "custom/updates",
+        "idle_inhibitor",
+        "memory",
+        "cpu",
+        "temperature",
+        "backlight",
+        "wireplumber",
+        "network",
+        "battery",
+        "custom/clipboard",
+        "clock",
+        "tray"
+    ],
+
+    "sway/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
         "format": "{icon}",
         "format-icons": {
-            "1": "1",
-            "2": "2",
-            "3": "3",
-            "4": "4",
-            "5": "5",
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": "",
+            "5": "",
             "urgent": "",
-            "active": "",
+            "focused": "",
             "default": ""
-        },
-        "persistent_workspaces": {
-            "1": [],
-            "2": [],
-            "3": [],
-            "4": [],
-            "5": []
         }
     },
-    "hyprland/window": {
-        "format": "{}",
-        "max-length": 50
+
+    "sway/mode": {
+        "format": "<span style=\"italic\">{}</span>"
     },
+
+    "sway/scratchpad": {
+        "format": "{icon} {count}",
+        "show-empty": false,
+        "format-icons": ["", ""],
+        "tooltip": true,
+        "tooltip-format": "{app}: {title}"
+    },
+
     "tray": {
+        "icon-size": 16,
         "spacing": 10
     },
+
     "clock": {
         "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
         "format": "{:%H:%M}",
         "format-alt": "{:%Y-%m-%d}"
     },
+
     "cpu": {
         "format": " {usage}%",
-        "tooltip": false,
-        "on-click": "alacritty -e btm"
+        "tooltip": true
     },
+
     "memory": {
-        "format": " {}%",
-        "on-click": "alacritty -e btm"
+        "format": " {}%"
     },
+
     "temperature": {
         "critical-threshold": 80,
         "format": "{icon} {temperatureC}°C",
         "format-icons": ["", "", ""]
     },
+
+    "backlight": {
+        "format": "{icon} {percent}%",
+        "format-icons": ["", "", "", "", "", "", "", "", ""]
+    },
+
     "battery": {
         "states": {
             "good": 95,
@@ -65,6 +96,7 @@
         "format-alt": "{icon} {time}",
         "format-icons": ["", "", "", "", ""]
     },
+
     "network": {
         "format-wifi": " {essid} ({signalStrength}%)",
         "format-ethernet": " {ipaddr}/{cidr}",
@@ -73,20 +105,39 @@
         "format-disconnected": "⚠ Disconnected",
         "format-alt": "{ifname}: {ipaddr}/{cidr}"
     },
-    "pulseaudio": {
+
+    "wireplumber": {
         "format": "{icon} {volume}%",
-        "format-bluetooth": "{icon} {volume}% ",
-        "format-bluetooth-muted": " {icon} ",
-        "format-muted": " ",
+        "format-muted": " Muted",
+        "on-click": "pavucontrol",
+        "format-icons": ["", "", ""]
+    },
+
+    "custom/weather": {
+        "exec": "curl -s 'wttr.in/?format=%C+%t'",
+        "interval": 3600,
+        "format": " {}"
+    },
+
+    "custom/updates": {
+        "exec": "checkupdates | wc -l",
+        "interval": 3600,
+        "format": " {}",
+        "return-type": "json",
+        "exec-if": "exit 0",
+        "on-click": "alacritty -e sudo pacman -Syu"
+    },
+
+    "custom/clipboard": {
+        "format": "",
+        "on-click": "clipman pick -t rofi"
+    },
+
+    "idle_inhibitor": {
+        "format": "{icon}",
         "format-icons": {
-            "headphone": "",
-            "hands-free": "",
-            "headset": "",
-            "phone": "",
-            "portable": "",
-            "car": "",
-            "default": ["", "", ""]
-        },
-        "on-click": "pavucontrol"
+            "activated": "",
+            "deactivated": ""
+        }
     }
 }
