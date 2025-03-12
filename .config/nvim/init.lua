@@ -23,7 +23,7 @@ require('packer').startup(function(use)
   use 'henriklovhaug/Preview.nvim'
 
   -- Tree
-  use {'nvim-tree/nvim-tree.lua', requires = { 'nvim-tree/nvim-web-devicons'}
+  use {'nvim-tree/nvim-tree.lua', requires = { 'nvim-tree/nvim-web-devicons'}}
     
   -- LSP and completion
   use 'neovim/nvim-lspconfig'
