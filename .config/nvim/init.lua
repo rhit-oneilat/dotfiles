@@ -5,6 +5,12 @@ if vim.fn.empty(vim.fn.glob(install_path)) > 0 then
   vim.cmd('packadd packer.nvim')
 end
 
+-- disable netrw at the very start of your init.lua
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
+
+-- optionally enable 24-bit colour
+vim.opt.termguicolors = true
 -- Set leader key
 vim.g.mapleader = " "
 
@@ -15,6 +21,9 @@ require('packer').startup(function(use)
 
   -- Markdown files
   use 'henriklovhaug/Preview.nvim'
+
+  -- Tree
+  use {'nvim-tree/nvim-tree.lua', requires = { 'nvim-tree/nvim-web-devicons'}
     
   -- LSP and completion
   use 'neovim/nvim-lspconfig'
@@ -80,6 +89,7 @@ end)
 
 require('preview').setup()
 
+require("nvim-tree").setup()
 
 -- Editor Settings
 vim.opt.number = true
