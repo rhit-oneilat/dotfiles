@@ -79,6 +79,11 @@ _G.packer_plugins = {
     path = "/home/aidan/.local/share/nvim/site/pack/packer/start/LuaSnip",
     url = "https://github.com/L3MON4D3/LuaSnip"
   },
+  ["Preview.nvim"] = {
+    loaded = true,
+    path = "/home/aidan/.local/share/nvim/site/pack/packer/start/Preview.nvim",
+    url = "https://github.com/henriklovhaug/Preview.nvim"
+  },
   ["auto-session"] = {
     loaded = true,
     path = "/home/aidan/.local/share/nvim/site/pack/packer/start/auto-session",
@@ -133,6 +138,11 @@ _G.packer_plugins = {
     loaded = true,
     path = "/home/aidan/.local/share/nvim/site/pack/packer/start/gitsigns.nvim",
     url = "https://github.com/lewis6991/gitsigns.nvim"
+  },
+  ["gruvbox.nvim"] = {
+    loaded = true,
+    path = "/home/aidan/.local/share/nvim/site/pack/packer/start/gruvbox.nvim",
+    url = "https://github.com/ellisonleao/gruvbox.nvim"
   },
   ["iron.nvim"] = {
     loaded = true,
