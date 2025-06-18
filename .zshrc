@@ -1,0 +1,1 @@
+/home/aidan/dotfiles/.zshrc
