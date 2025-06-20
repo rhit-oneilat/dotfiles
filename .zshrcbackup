@@ -1,0 +1,213 @@
+# Basic Zsh configuration
+export ZSH="$HOME/.oh-my-zsh"  # If using oh-my-zsh
+export PATH="$HOME/go/bin:$PATH"
+# Initialize Starship prompt
+eval "$(starship init zsh)"
+
+tput civis
+# Animated startup (only for interactive shells)
+if [[ $- == *i* ]] && [[ -f ~/.config/charm/animated_startup.sh ]]; then
+    source ~/.config/charm/animated_startup.sh
+fi
+tput cnorm
+
+HISTSIZE=10000
+SAVEHIST=10000
+HISTFILE=~/.zsh_history
+setopt SHARE_HISTORY
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_SAVE_NO_DUPS
+
+# Enable substring history search
+# Install: git clone https://github.com/zsh-users/zsh-history-substring-search ~/.oh-my-zsh/custom/plugins/zsh-history-substring-search
+source ~/.oh-my-zsh/custom/plugins/zsh-history-substring-search/zsh-history-substring-search.zsh
+bindkey '^[[A' history-substring-search-up
+bindkey '^[[B' history-substring-search-down
+bindkey -M vicmd 'k' history-substring-search-up
+bindkey -M vicmd 'j' history-substring-search-down
+
+# FZF configuration
+# Install: brew install fzf or git clone --depth 1 https://github.com/junegunn/fzf.git ~/.fzf && ~/.fzf/install
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+
+export EDITOR="nvim"
+export VISUAL="nvim"
+
+# FZF default options
+export FZF_DEFAULT_OPTS='
+  --height 40%
+  --layout=reverse
+  --border
+  --preview "bat --style=numbers --color=always --line-range :500 {}"
+  --preview-window=right:50%
+'
+
+# Use ripgrep for FZF if available
+if command -v rg &> /dev/null; then
+  export FZF_DEFAULT_COMMAND='rg --files --hidden --follow --glob "!.git/*"'
+  export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+fi
+
+# Enhanced FZF key bindings
+export FZF_CTRL_T_OPTS="
+  --preview 'bat --style=numbers --color=always --line-range :500 {}'
+  --bind 'ctrl-/:change-preview-window(down|hidden|)'
+"
+
+export FZF_CTRL_R_OPTS="
+  --preview 'echo {}' --preview-window up:3:hidden:wrap
+  --bind 'ctrl-/:toggle-preview'
+  --bind 'ctrl-y:execute-silent(echo -n {2..} | pbcopy)+abort'
+  --color header:italic
+  --header 'Press CTRL-Y to copy command into clipboard'
+"
+
+export FZF_ALT_C_OPTS="--preview 'tree -C {} | head -200'"
+
+# Ripgrep configuration
+if command -v rg &> /dev/null; then
+  alias rg='rg --smart-case --follow --hidden'
+fi
+
+# Custom functions using fzf and ripgrep
+# Interactive grep with fzf
+fzf-grep() {
+  local query=$1
+  if [[ -z $query ]]; then
+    echo "Usage: fzf-grep <search-term>"
+    return 1
+  fi
+  rg --line-number --no-heading --color=always --smart-case "$query" |
+    fzf --ansi \
+        --color "hl:-1:underline,hl+:-1:underline:reverse" \
+        --delimiter : \
+        --preview 'bat --color=always {1} --highlight-line {2}' \
+        --preview-window 'up,60%,border-bottom,+{2}+3/3,~3' \
+        --bind 'enter:become(nvim {1} +{2})'
+}
+
+# Interactive file finder with preview
+fzf-find() {
+  local file
+  file=$(find . -type f 2>/dev/null | fzf --preview 'bat --style=numbers --color=always --line-range :500 {}')
+  [[ -n $file ]] && ${EDITOR:-vim} "$file"
+}
+
+# Search and edit files containing text
+fzf-edit() {
+  local file line
+  read -r file line <<<"$(rg --no-heading --line-number . | fzf --delimiter=: --preview 'bat --color=always --highlight-line {2} {1}' | awk -F: '{print $1, $2}')"
+  [[ -n $file ]] && ${EDITOR:-vim} +"$line" "$file"
+}
+
+# Kill process with fzf
+fzf-kill() {
+  local pid
+  pid=$(ps -ef | sed 1d | fzf -m | awk '{print $2}')
+  if [[ -n $pid ]]; then
+    echo $pid | xargs kill -${1:-9}
+  fi
+}
+
+# Git branch switcher
+fzf-git-branch() {
+  git branch -a | grep -v HEAD | sed 's/.* //' | sed 's#remotes/[^/]*/##' | sort -u | fzf | xargs git checkout
+}
+
+# Directory navigation with fzf
+fzf-cd() {
+  local dir
+  dir=$(find ${1:-.} -path '*/\.*' -prune -o -type d -print 2> /dev/null | fzf +m) && cd "$dir"
+}
+
+# Aliases for the functions
+alias fgrep='fzf-grep'
+alias ff='fzf-find'
+alias fe='fzf-edit'
+alias fk='fzf-kill'
+alias gb='fzf-git-branch'
+alias fcd='fzf-cd'
+
+# Charm.sh integrations
+export PATH="$HOME/go/bin:$PATH"  # For Go-installed tools
+
+# Gum-enhanced functions
+gum-commit() {
+    local type scope message
+    type=$(gum choose "fix" "feat" "docs" "style" "refactor" "test" "chore" "revert")
+    scope=$(gum input --placeholder "scope")
+
+    if [[ -n "$scope" ]]; then
+        scope="($scope)"
+    fi
+
+    message=$(gum input --placeholder "Summary of changes")
+    gum confirm "Commit with message: $type$scope: $message" && git commit -m "$type$scope: $message"
+}
+
+gum-branch() {
+    local branch
+    branch=$(git branch --format='%(refname:short)' | gum choose)
+    git checkout "$branch"
+}
+
+gum-project() {
+    local project_dir
+    project_dir=$(find ~/projects ~/work ~/dev -maxdepth 1 -type d 2>/dev/null | gum choose)
+    [[ -n "$project_dir" ]] && cd "$project_dir"
+}
+
+# AI assistance with mods
+ask() {
+    local question="$*"
+    if [[ -z "$question" ]]; then
+        question=$(gum input --placeholder "What do you want to ask?")
+    fi
+    mods "$question"
+}
+
+# Quick notes with skate
+note() {
+    local note_key note_content
+    note_key=$(gum input --placeholder "Note key/title")
+    note_content=$(gum write --placeholder "Write your note...")
+    skate set "$note_key" "$note_content"
+}
+
+get-note() {
+    local note_key
+    note_key=$(skate list | gum choose)
+    skate get "$note_key" | glow
+}
+
+# Additional useful aliases
+alias l='ls -lah'
+alias ..='cd ..'
+alias ...='cd ../..'
+alias grep='grep --color=auto'
+alias cat='bat'  # If you have bat installed
+alias find='fd'  # If you have fd installed
+alias gc='gum-commit'
+alias gb='gum-branch'
+alias gp='gum-project'
+alias md='glow'
+alias ai='ask'
+
+# Enable syntax highlighting (install first)
+# git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting
+source ~/.oh-my-zsh/custom/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
+# Enable autosuggestions (install first)
+# git clone https://github.com/zsh-users/zsh-autosuggestions ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions
+source ~/.oh-my-zsh/custom/plugins/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+# Load completions
+autoload -Uz compinit && compinit
+
+# Case insensitive completion
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Za-z}'
+
+# Colored completion (if you have GNU ls)
+zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
